@@ -258,3 +258,59 @@ export const brainstormIdeas = async (goal: string): Promise<GeneratedTaskData[]
     throw error;
   }
 };
+
+export const optimizeSchedule = async (tasks: Task[]): Promise<Task[]> => {
+  try {
+    const prompt = `
+      Current Date: ${new Date().toISOString().split('T')[0]}
+      Tasks: ${JSON.stringify(tasks.map(t => ({ id: t.id, title: t.title, priority: t.priority, dueDate: t.dueDate, isCompleted: t.isCompleted })))}
+      
+      You are an expert scheduler. Organize these tasks to maximize productivity.
+      1. Assign due dates to tasks that don't have them, based on priority.
+      2. If a task is High priority, it should probably be due sooner.
+      3. Reorder the list so the most important things are first.
+      
+      Return the FULL list of tasks with updated dueDates and an idealized order.
+      Return JSON Array of Task objects (simplified to id and updates).
+    `;
+
+    const makeRequest = () => ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              id: { type: Type.STRING },
+              dueDate: { type: Type.STRING },
+              priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] }
+            },
+            required: ["id", "dueDate", "priority"]
+          }
+        }
+      }
+    });
+
+    const response = await callAIWithRetry(makeRequest);
+    const text = cleanJson(response.text || "");
+    if (!text) return tasks;
+
+    const updates = JSON.parse(text);
+
+    // Apply updates
+    return tasks.map(t => {
+      const update = updates.find((u: any) => u.id === t.id);
+      if (update) {
+        return { ...t, dueDate: update.dueDate, priority: update.priority };
+      }
+      return t;
+    });
+
+  } catch (error) {
+    console.error("Optimization Error:", error);
+    return tasks;
+  }
+};

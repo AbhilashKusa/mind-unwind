@@ -1,36 +1,38 @@
-
-import React, { useState, useCallback, useEffect } from 'react';
-import { processUserCommand } from './services/gemini';
-import { StorageService } from './services/storage';
-import { Task, Priority, User, GeneratedTaskData } from './types';
+import React, { useState, useEffect } from 'react';
+import { useStore } from './store/useStore';
+import { Priority, Task, GeneratedTaskData } from './types';
 import TaskCard from './components/TaskCard';
-import { SparklesIcon, BrainIcon, UserIcon, CalendarIcon, ListIcon, MagicIcon, PlusIcon, CloseIcon, LightbulbIcon, CloudCheckIcon, SortIcon } from './components/Icons';
+import { ListIcon, CalendarIcon, PlusIcon, CloseIcon, LightbulbIcon, SortIcon, CalendarIcon as CalendarIconSmall, BoardIcon, SparklesIcon } from './components/Icons';
 import { EmptyState } from './components/EmptyState';
 import LoginScreen from './components/LoginScreen';
 import TaskDetailModal from './components/TaskDetailModal';
 import CalendarView from './components/CalendarView';
+import { BoardView } from './components/BoardView';
 import BrainstormModal from './components/BrainstormModal';
+import { Header } from './components/Layout/Header';
+import { CommandCenter } from './components/Dashboard/CommandCenter';
+import { optimizeSchedule } from './services/gemini';
+import { DayBoardModal } from './components/DayBoardModal';
 
 type SortOption = 'newest' | 'priority' | 'dueDate';
 
 const App: React.FC = () => {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [dbConnected, setDbConnected] = useState(false);
-
-    const [commandInput, setCommandInput] = useState('');
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [aiResponse, setAiResponse] = useState<string | null>(null);
+    const {
+        user, tasks, isLoaded, dbConnected, viewMode,
+        initApp, setUser, addTask, setViewMode,
+        isBrainstormOpen, setBrainstormOpen,
+        isManualAddOpen, setManualAddOpen,
+        toggleTask, deleteTask, updateTask, setTasks
+    } = useStore();
 
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-    const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
     const [sortOption, setSortOption] = useState<SortOption>('priority');
+    const [isOptimizing, setIsOptimizing] = useState(false);
 
-    const [isManualAddOpen, setIsManualAddOpen] = useState(false);
-    const [isBrainstormOpen, setIsBrainstormOpen] = useState(false);
+    // Day Board Modal State
+    const [selectedDayDate, setSelectedDayDate] = useState<string | null>(null);
+    const [isDayBoardOpen, setIsDayBoardOpen] = useState(false);
 
     const getTodayString = () => {
         const d = new Date();
@@ -44,105 +46,14 @@ const App: React.FC = () => {
     const [manualPriority, setManualPriority] = useState<Priority>(Priority.Medium);
     const [manualDueDate, setManualDueDate] = useState<string>(getTodayString());
 
-    // Load data from DB on mount
     useEffect(() => {
-        const init = async () => {
-            const isConnected = await StorageService.checkConnection();
-            setDbConnected(isConnected);
-
-            const loadedUser = await StorageService.getUser();
-            const loadedTasks = await StorageService.getTasks();
-
-            if (loadedUser) setUser(loadedUser);
-            setTasks(loadedTasks);
-
-            setIsLoaded(true);
-        };
-        init();
-    }, []);
-
-    // Removed Auto-Save useEffects in favor of direct API calls in handlers for performance
-
-    const handleLogin = async (newUser: User) => {
-        setUser(newUser);
-        await StorageService.saveUser(newUser);
-    };
-
-    const handleLogout = async () => {
-        if (confirm("Log out?")) {
-            setUser(null);
-            await StorageService.saveUser(null);
-        }
-    };
+        initApp();
+    }, [initApp]);
 
     const generateId = () => Math.random().toString(36).substr(2, 9);
 
-    const handleCommandChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setCommandInput(e.target.value);
-        if (error) setError(null);
-        if (aiResponse) setAiResponse(null);
-    };
-
-    const handleProcessCommand = async () => {
-        if (!commandInput.trim()) return;
-
-        setIsProcessing(true);
-        setError(null);
-        setAiResponse(null);
-
-        try {
-            const response = await processUserCommand(commandInput, tasks);
-
-            const newTasks: Task[] = response.added.map(item => ({
-                id: generateId(),
-                title: item.title,
-                description: item.description,
-                priority: item.priority as Priority,
-                category: item.category,
-                isCompleted: false,
-                dueDate: item.dueDate,
-                subtasks: [],
-                comments: [],
-                createdAt: Date.now()
-            }));
-
-            // Persist Additions
-            for (const t of newTasks) {
-                await StorageService.saveTask(t);
-            }
-
-            // Persist Deletions
-            for (const id of response.deletedIds) {
-                await StorageService.deleteTask(id);
-            }
-
-            // Calculate state for updates to display correctly, but persist them too
-            const remainingTasks = tasks.filter(t => !response.deletedIds.includes(t.id));
-
-            const finalTasks = [];
-            for (const task of remainingTasks) {
-                const update = response.updated.find(u => u.id === task.id);
-                if (update) {
-                    const updatedTask = { ...task, ...update.updates };
-                    finalTasks.push(updatedTask);
-                    await StorageService.saveTask(updatedTask); // Persist Update
-                } else {
-                    finalTasks.push(task);
-                }
-            }
-
-            // Update Local State
-            setTasks([...newTasks, ...finalTasks]);
-            setAiResponse(response.aiResponse);
-            setCommandInput('');
-
-            setTimeout(() => setAiResponse(null), 5000);
-
-        } catch (err) {
-            setError("I couldn't quite catch that. Try rephrasing.");
-        } finally {
-            setIsProcessing(false);
-        }
+    const handleLogin = async (newUser: any) => {
+        await setUser(newUser);
     };
 
     const handleManualAdd = async (e: React.FormEvent) => {
@@ -161,63 +72,51 @@ const App: React.FC = () => {
             createdAt: Date.now()
         };
 
-        // Update UI
-        setTasks(prev => [newTask, ...prev]);
-        // Save DB
-        await StorageService.saveTask(newTask);
-
+        await addTask(newTask);
         setManualTitle('');
-        setIsManualAddOpen(false);
+        setManualAddOpen(false);
     };
 
     const handleBrainstormAdd = async (generatedTasks: GeneratedTaskData[]) => {
-        const newTasks: Task[] = generatedTasks.map(t => ({
-            id: generateId(),
-            title: t.title,
-            description: t.description,
-            priority: t.priority as Priority,
-            category: t.category,
-            isCompleted: false,
-            dueDate: t.dueDate || undefined,
-            subtasks: [],
-            comments: [],
-            createdAt: Date.now()
-        }));
-
-        setTasks(prev => [...newTasks, ...prev]);
-        // Save all to DB
-        for (const t of newTasks) {
-            await StorageService.saveTask(t);
+        for (const t of generatedTasks) {
+            const newTask: Task = {
+                id: generateId(),
+                title: t.title,
+                description: t.description,
+                priority: t.priority as Priority,
+                category: t.category,
+                isCompleted: false,
+                dueDate: t.dueDate || undefined,
+                subtasks: [],
+                comments: [],
+                createdAt: Date.now()
+            };
+            await addTask(newTask);
         }
     };
 
-    const toggleTask = useCallback(async (id: string) => {
-        let taskToUpdate: Task | undefined;
-
-        setTasks(prev => prev.map(t => {
-            if (t.id === id) {
-                taskToUpdate = { ...t, isCompleted: !t.isCompleted };
-                return taskToUpdate;
+    const handleOptimize = async () => {
+        if (tasks.length === 0 || isOptimizing) return;
+        setIsOptimizing(true);
+        try {
+            const optimizedTasks = await optimizeSchedule(tasks);
+            setTasks(optimizedTasks);
+            for (const t of optimizedTasks) {
+                await updateTask(t);
             }
-            return t;
-        }));
-
-        if (taskToUpdate) {
-            await StorageService.saveTask(taskToUpdate);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsOptimizing(false);
         }
-    }, []);
+    };
 
-    const deleteTask = useCallback(async (id: string) => {
-        setTasks(prev => prev.filter(t => t.id !== id));
-        await StorageService.deleteTask(id);
-    }, []);
 
     const clearAllTasks = async () => {
         if (confirm("Are you sure you want to clear all tasks?")) {
-            const ids = tasks.map(t => t.id);
-            setTasks([]);
-            for (const id of ids) {
-                await StorageService.deleteTask(id);
+            const currentTasks = [...tasks];
+            for (const t of currentTasks) {
+                await deleteTask(t.id);
             }
         }
     };
@@ -228,19 +127,18 @@ const App: React.FC = () => {
     };
 
     const handleTaskUpdate = async (updatedTask: Task) => {
-        setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+        await updateTask(updatedTask);
         setSelectedTask(updatedTask);
-        await StorageService.saveTask(updatedTask);
     };
 
     const handleDateSelect = (date: string) => {
-        setManualDueDate(date);
-        setIsManualAddOpen(true);
+        setSelectedDayDate(date);
+        setIsDayBoardOpen(true);
     };
 
     const openQuickAdd = () => {
         setManualDueDate(getTodayString());
-        setIsManualAddOpen(true);
+        setManualAddOpen(true);
     }
 
     const getSortedTasks = () => {
@@ -295,118 +193,40 @@ const App: React.FC = () => {
     }
 
     if (!user) {
-        return <LoginScreen onLogin={handleLogin} />;
+        return <LoginScreen onLogin={() => { }} />;
     }
 
-    const completedCount = tasks.filter(t => t.isCompleted).length;
-    const totalCount = tasks.length;
-    const progress = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
     const sortedTasks = getSortedTasks();
 
     return (
         <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white">
-
-            {/* Header */}
-            <header className="bg-white border-b-2 border-black sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-black p-2.5 border-2 border-black">
-                            <BrainIcon className="w-6 h-6 text-white" />
-                        </div>
-                        <h1 className="text-2xl font-bold tracking-tight text-black hidden sm:block">
-                            MindUnwind
-                        </h1>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-600">
-                            <CloudCheckIcon className="w-4 h-4" />
-                            <span>DB Connected</span>
-                        </div>
-                        <div className="text-xs font-bold border-2 border-black px-3 py-1 bg-gray-50 hidden sm:block shadow-sharp-sm uppercase tracking-wider">
-                            {totalCount > 0 ? `${completedCount}/${totalCount} DONE` : 'READY'}
-                        </div>
-                        <button onClick={handleLogout} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-                            <div className="bg-black p-1.5 rounded-full">
-                                <UserIcon className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-xs font-bold uppercase tracking-wide hidden sm:inline-block">{user.name}</span>
-                        </button>
-                    </div>
-                </div>
-                {/* Progress Bar */}
-                <div className="h-1.5 w-full bg-gray-100 border-b border-black">
-                    <div
-                        className="h-full bg-black transition-all duration-500 ease-out"
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
-            </header>
+            <Header />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
                     {/* Left Column: Command Center */}
                     <div className="lg:col-span-5 flex flex-col gap-6">
-                        <div className="bg-white p-6 border-2 border-black shadow-sharp flex flex-col h-[600px] lg:h-[calc(100vh-160px)] sticky top-28">
-                            <div className="mb-6 pb-4 border-b-2 border-gray-100 flex justify-between items-start">
+                        <CommandCenter />
+
+                        {/* Automation Panel */}
+                        <div className="bg-gradient-to-br from-gray-900 to-black p-6 border-2 border-black shadow-sharp text-white">
+                            <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h2 className="text-xl font-bold text-black flex items-center gap-2 uppercase tracking-wide">
-                                        Command Center
-                                    </h2>
-                                    <p className="text-[10px] font-bold text-gray-500 mt-2 uppercase tracking-widest">
-                                        AI Context Aware • Gemini 3.0 Pro
-                                    </p>
-                                </div>
-                                <div className="p-2 bg-black text-white">
-                                    <MagicIcon className="w-5 h-5" />
+                                    <h3 className="font-bold text-lg uppercase tracking-wide flex items-center gap-2">
+                                        <SparklesIcon className="w-5 h-5 text-yellow-400" />
+                                        Smart Schedule
+                                    </h3>
+                                    <p className="text-xs text-gray-400 mt-1">Let AI organize your day and assign due dates.</p>
                                 </div>
                             </div>
-
-                            <textarea
-                                value={commandInput}
-                                onChange={handleCommandChange}
-                                placeholder={`Type commands like:\n"Add a meeting with Joe tomorrow"\n"Move all work tasks to Friday"\n"Delete the grocery task"`}
-                                className="flex-grow w-full p-4 bg-gray-50 border-2 border-gray-200 focus:border-black focus:bg-white transition-all resize-none text-black placeholder:text-gray-400 focus:outline-none text-sm leading-relaxed font-mono"
-                                spellCheck={false}
-                            />
-
-                            <div className="mt-6 space-y-3">
-                                <button
-                                    onClick={handleProcessCommand}
-                                    disabled={isProcessing || !commandInput.trim()}
-                                    className={`w-full py-4 px-6 font-bold text-white border-2 border-black flex items-center justify-center gap-3 transition-all transform active:translate-y-1 active:shadow-none uppercase tracking-widest
-                    ${isProcessing || !commandInput.trim()
-                                            ? 'bg-gray-300 border-gray-300 cursor-not-allowed text-gray-500'
-                                            : 'bg-black shadow-sharp hover:shadow-sharp-hover hover:-translate-y-0.5'
-                                        }`}
-                                >
-                                    {isProcessing ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <SparklesIcon className="w-4 h-4" />
-                                            Execute Command
-                                        </>
-                                    )}
-                                </button>
-
-                                {/* AI Response Feedback */}
-                                {aiResponse && (
-                                    <div className="p-3 bg-gray-50 border-2 border-black text-xs font-mono animate-in fade-in slide-in-from-top-2">
-                                        <span className="font-bold mr-2">AI:</span>
-                                        {aiResponse}
-                                    </div>
-                                )}
-                                {error && (
-                                    <p className="text-red-600 text-xs font-bold text-center mt-3 uppercase">
-                                        {error}
-                                    </p>
-                                )}
-                            </div>
+                            <button
+                                onClick={handleOptimize}
+                                disabled={isOptimizing}
+                                className="w-full py-3 bg-white text-black font-bold uppercase tracking-widest hover:bg-gray-200 transition-colors disabled:opacity-50"
+                            >
+                                {isOptimizing ? 'Optimizing...' : 'Optimize Now'}
+                            </button>
                         </div>
                     </div>
 
@@ -419,13 +239,23 @@ const App: React.FC = () => {
                                     <button
                                         onClick={() => setViewMode('list')}
                                         className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                                        title="List View"
                                     >
                                         <ListIcon className="w-4 h-4" />
                                     </button>
                                     <div className="w-[2px] bg-black"></div>
                                     <button
+                                        onClick={() => setViewMode('board')}
+                                        className={`p-2 transition-colors ${viewMode === 'board' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                                        title="Board View"
+                                    >
+                                        <BoardIcon className="w-4 h-4" />
+                                    </button>
+                                    <div className="w-[2px] bg-black"></div>
+                                    <button
                                         onClick={() => setViewMode('calendar')}
                                         className={`p-2 transition-colors ${viewMode === 'calendar' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                                        title="Calendar View"
                                     >
                                         <CalendarIcon className="w-4 h-4" />
                                     </button>
@@ -450,7 +280,7 @@ const App: React.FC = () => {
 
                                 {/* Brainstorm Button */}
                                 <button
-                                    onClick={() => setIsBrainstormOpen(true)}
+                                    onClick={() => setBrainstormOpen(true)}
                                     className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-all shadow-sharp-sm group"
                                     title="Brainstorm Mode"
                                 >
@@ -482,19 +312,26 @@ const App: React.FC = () => {
                                 <EmptyState />
                             ) : (
                                 <>
-                                    {viewMode === 'list' ? (
+                                    {viewMode === 'list' && (
                                         <div className="space-y-3 animate-in fade-in duration-300">
                                             {sortedTasks.map((task) => (
                                                 <TaskCard
                                                     key={task.id}
                                                     task={task}
-                                                    onToggle={toggleTask}
-                                                    onDelete={deleteTask}
+                                                    onToggle={async (id) => await toggleTask(id)}
+                                                    onDelete={async (id) => await deleteTask(id)}
                                                     onClick={openTaskDetail}
                                                 />
                                             ))}
                                         </div>
-                                    ) : (
+                                    )}
+                                    {viewMode === 'board' && (
+                                        <BoardView
+                                            tasks={tasks}
+                                            onTaskClick={openTaskDetail}
+                                        />
+                                    )}
+                                    {viewMode === 'calendar' && (
                                         <CalendarView
                                             tasks={tasks}
                                             onTaskClick={openTaskDetail}
@@ -520,8 +357,16 @@ const App: React.FC = () => {
 
             <BrainstormModal
                 isOpen={isBrainstormOpen}
-                onClose={() => setIsBrainstormOpen(false)}
+                onClose={() => setBrainstormOpen(false)}
                 onAddTasks={handleBrainstormAdd}
+            />
+
+            <DayBoardModal
+                date={selectedDayDate || ''}
+                tasks={tasks.filter(t => t.dueDate === selectedDayDate)}
+                isOpen={isDayBoardOpen}
+                onClose={() => setIsDayBoardOpen(false)}
+                onTaskClick={openTaskDetail}
             />
 
             {isManualAddOpen && (
@@ -529,7 +374,7 @@ const App: React.FC = () => {
                     <div className="bg-white border-2 border-black shadow-sharp p-6 w-full max-w-md">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-bold uppercase tracking-wide">New Task</h3>
-                            <button onClick={() => setIsManualAddOpen(false)}><CloseIcon className="w-6 h-6" /></button>
+                            <button onClick={() => setManualAddOpen(false)}><CloseIcon className="w-6 h-6" /></button>
                         </div>
                         <form onSubmit={handleManualAdd} className="space-y-4">
                             <input
@@ -549,8 +394,8 @@ const App: React.FC = () => {
                                         type="button"
                                         onClick={() => setManualPriority(p)}
                                         className={`flex-1 py-2 text-xs font-bold uppercase border-2 ${manualPriority === p
-                                                ? 'bg-black text-white border-black'
-                                                : 'bg-white text-gray-500 border-gray-200'
+                                            ? 'bg-black text-white border-black'
+                                            : 'bg-white text-gray-500 border-gray-200'
                                             }`}
                                     >
                                         {p}
@@ -570,7 +415,7 @@ const App: React.FC = () => {
                                         onChange={(e) => setManualDueDate(e.target.value)}
                                         className="w-full bg-white border-2 border-gray-200 p-3 text-xs font-bold focus:border-black outline-none uppercase tracking-wide"
                                     />
-                                    <CalendarIcon className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                    <CalendarIconSmall className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                 </div>
                             </div>
 
