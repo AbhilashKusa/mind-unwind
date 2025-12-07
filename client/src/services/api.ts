@@ -10,6 +10,15 @@ const getHeaders = () => {
     };
 };
 
+const handleAuthError = (res: Response) => {
+    if (res.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/'; // Simple redirect to reload/login
+        throw new Error('Session expired');
+    }
+    return res;
+};
+
 export const api = {
     checkHealth: async (): Promise<boolean> => {
         try {
@@ -21,46 +30,54 @@ export const api = {
     },
 
     getUser: async (): Promise<User | null> => {
-        const res = await fetch(`${API_URL}/user`, { headers: getHeaders() });
+        const res = await fetch(`${API_URL}/auth/me`, { headers: getHeaders() });
+        if (res.status === 401) {
+            localStorage.removeItem('token');
+            return null;
+        }
         if (!res.ok) return null;
         return res.json();
     },
 
     createUser: async (user: Partial<User>): Promise<void> => {
-        await fetch(`${API_URL}/user`, {
+        const res = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(user),
         });
+        // No 401 check needed for register usually, but good practice if protected
     },
 
     getTasks: async (): Promise<Task[]> => {
         const res = await fetch(`${API_URL}/tasks`, { headers: getHeaders() });
+        handleAuthError(res);
         if (!res.ok) throw new Error('Failed to fetch tasks');
         return res.json();
     },
 
     createTask: async (task: Task): Promise<void> => {
-        await fetch(`${API_URL}/tasks`, {
+        const res = await fetch(`${API_URL}/tasks`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(task),
         });
+        handleAuthError(res);
     },
 
     updateTask: async (task: Task): Promise<void> => {
-        // reuse create for upsert
-        await fetch(`${API_URL}/tasks`, {
+        const res = await fetch(`${API_URL}/tasks`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(task),
         });
+        handleAuthError(res);
     },
 
     deleteTask: async (id: string): Promise<void> => {
-        await fetch(`${API_URL}/tasks/${id}`, {
+        const res = await fetch(`${API_URL}/tasks/${id}`, {
             method: 'DELETE',
             headers: getHeaders(),
         });
+        handleAuthError(res);
     }
 };

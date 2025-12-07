@@ -24,6 +24,10 @@ interface StoreState extends AppState {
     setViewMode: (mode: ViewMode) => void;
     setBrainstormOpen: (isOpen: boolean) => void;
     setManualAddOpen: (isOpen: boolean) => void;
+
+    isProfileOpen: boolean;
+    setProfileOpen: (isOpen: boolean) => void;
+    updateUserProfile: (name: string, password?: string) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -170,5 +174,20 @@ export const useStore = create<StoreState>((set, get) => ({
 
     setViewMode: (mode) => set({ viewMode: mode }),
     setBrainstormOpen: (isOpen) => set({ isBrainstormOpen: isOpen }),
-    setManualAddOpen: (isOpen) => set({ isManualAddOpen: isOpen })
+    setManualAddOpen: (isOpen) => set({ isManualAddOpen: isOpen }),
+
+    // Profile
+    isProfileOpen: false,
+    setProfileOpen: (isOpen: boolean) => set({ isProfileOpen: isOpen }),
+    updateUserProfile: async (name, password) => {
+        try {
+            const token = get().token;
+            if (!token) return;
+            const updatedUser = await AuthService.updateProfile(name, password, token);
+            set({ user: updatedUser });
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+    }
 }));

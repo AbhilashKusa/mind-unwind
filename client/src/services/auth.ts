@@ -36,4 +36,23 @@ export class AuthService {
         if (!res.ok) throw new Error('Invalid token');
         return res.json();
     }
+    static async updateProfile(name: string, password?: string, token?: string): Promise<any> {
+        const body: any = { name };
+        if (password) body.password = password;
+
+        const res = await fetch(`${this.API_URL}/auth/me`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Update failed');
+        }
+        return res.json();
+    }
 }

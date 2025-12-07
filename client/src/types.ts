@@ -54,3 +54,16 @@ export interface AICommandResponse {
   deletedIds: string[];
   aiResponse: string; // A brief message from the AI explaining what it did
 }
+
+export type ViewMode = 'list' | 'board' | 'calendar';
+
+export interface AppState {
+  user: User | null;
+  tasks: Task[];
+  isLoaded: boolean;
+  dbConnected: boolean;
+  viewMode: ViewMode;
+  isBrainstormOpen: boolean;
+  isManualAddOpen: boolean;
+  isProfileOpen: boolean;
+}

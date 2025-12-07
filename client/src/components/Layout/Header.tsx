@@ -31,9 +31,11 @@ export const Header: React.FC = () => {
                     <div className="text-xs font-bold border-2 border-black px-3 py-1 bg-gray-50 hidden sm:block shadow-sharp-sm uppercase tracking-wider">
                         {totalCount > 0 ? `${completedCount}/${totalCount} DONE` : 'READY'}
                     </div>
-                    <button onClick={logout} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+                    <button onClick={() => useStore.getState().setProfileOpen(true)} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
                         <div className="bg-black p-1.5 rounded-full">
-                            <UserIcon className="w-4 h-4 text-white" />
+                            <span className="w-4 h-4 text-white text-xs flex items-center justify-center font-bold">
+                                {user.name.charAt(0).toUpperCase()}
+                            </span>
                         </div>
                         <span className="text-xs font-bold uppercase tracking-wide hidden sm:inline-block">{user.name}</span>
                     </button>

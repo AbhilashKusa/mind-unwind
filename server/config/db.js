@@ -37,6 +37,8 @@ const initDb = async () => {
             }
         }
         try { await client.query(`ALTER TABLE tasks ADD COLUMN user_id INTEGER;`); } catch (e) { }
+        try { await client.query(`ALTER TABLE tasks ADD COLUMN subtasks JSONB DEFAULT '[]'::jsonb;`); } catch (e) { }
+        try { await client.query(`ALTER TABLE tasks ADD COLUMN comments JSONB DEFAULT '[]'::jsonb;`); } catch (e) { }
 
         console.log("✅ DB Migration Checked");
         client.release();

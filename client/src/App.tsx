@@ -13,6 +13,7 @@ import { Header } from './components/Layout/Header';
 import { CommandCenter } from './components/Dashboard/CommandCenter';
 import { optimizeSchedule } from './services/gemini';
 import { DayBoardModal } from './components/DayBoardModal';
+import { ProfileModal } from './components/ProfileModal';
 
 type SortOption = 'newest' | 'priority' | 'dueDate';
 
@@ -22,7 +23,8 @@ const App: React.FC = () => {
         initApp, setUser, addTask, setViewMode,
         isBrainstormOpen, setBrainstormOpen,
         isManualAddOpen, setManualAddOpen,
-        toggleTask, deleteTask, updateTask, setTasks
+        toggleTask, deleteTask, updateTask, setTasks,
+        isProfileOpen, setProfileOpen
     } = useStore();
 
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -367,6 +369,11 @@ const App: React.FC = () => {
                 isOpen={isDayBoardOpen}
                 onClose={() => setIsDayBoardOpen(false)}
                 onTaskClick={openTaskDetail}
+            />
+
+            <ProfileModal
+                isOpen={isProfileOpen}
+                onClose={() => setProfileOpen(false)}
             />
 
             {isManualAddOpen && (

@@ -8,6 +8,9 @@ const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
 router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+    if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return res.status(400).json({ error: "Invalid email format" });
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -44,6 +47,36 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
         delete user.password_hash;
         res.json({ user, token });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update Profile
+router.put('/me', authenticateToken, async (req, res) => {
+    const { name, password } = req.body;
+    const userId = req.user.id;
+
+    try {
+        let query = 'UPDATE users SET name = $1';
+        let values = [name];
+        let idx = 2;
+
+        if (password) {
+            if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+            const hashedPassword = await bcrypt.hash(password, 10);
+            query += `, password_hash = $${idx}`;
+            values.push(hashedPassword);
+            idx++;
+        }
+
+        query += ` WHERE id = $${idx} RETURNING id, name, email, avatar`;
+        values.push(userId);
+
+        const result = await pool.query(query, values);
+
+        if (result.rows.length === 0) return res.sendStatus(404);
+        res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
