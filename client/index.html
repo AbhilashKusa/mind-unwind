@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindUnwind</title>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#f9fafb',   // gray-50
+              100: '#f3f4f6',  // gray-100
+              200: '#e5e7eb',  // gray-200
+              300: '#d1d5db',  // gray-300
+              400: '#9ca3af',  // gray-400
+              500: '#6b7280',  // gray-500
+              600: '#000000',  // Black for primary actions
+              700: '#1f2937',  // gray-800
+              800: '#111827',  // gray-900
+              900: '#030712',  // gray-950
+            }
+          },
+          boxShadow: {
+            'sharp': '0 4px 0 0 rgba(0, 0, 0, 1)',
+            'sharp-hover': '0 6px 0 0 rgba(0, 0, 0, 1)',
+            'sharp-sm': '0 2px 0 0 rgba(0, 0, 0, 1)',
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #ffffff;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e5e5e5;
+      border-radius: 0px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a3a3a3;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+</body>
+
+</html>

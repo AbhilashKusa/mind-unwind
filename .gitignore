@@ -1,0 +1,14 @@
+# Root gitignore
+node_modules
+.DS_Store
+.env
+.env.local
+.env.*.local
+*.log
+
+# Ignore git folder itself just in case (standard)
+.git
+
+# Editor
+.vscode
+.idea
