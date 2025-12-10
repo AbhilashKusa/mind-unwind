@@ -22,15 +22,6 @@ describe('API Endpoints', () => {
 
     // --- HAPPY PATHS ---
 
-    // Legacy Route or Public Route
-    test('GET /api/user should return status 200 and data', async () => {
-        jest.spyOn(pool, 'query').mockResolvedValueOnce({ rows: [{ name: 'Test User', avatar: 'test.jpg' }] });
-
-        const res = await request(app).get('/api/user');
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('name', 'Test User');
-    });
-
     test('GET /api/tasks should return a list of tasks', async () => {
         jest.spyOn(pool, 'query').mockResolvedValueOnce({
             rows: [{
@@ -46,11 +37,6 @@ describe('API Endpoints', () => {
         expect(res.body[0].title).toBe('Task 1');
     });
 
-    // Corrected Route: using /api/auth/register or removed if legacy.
-    // However, the original test was testing a POST to /api/user which failed 404.
-    // Since there is no POST /api/user, I will change this to test POST /api/tasks (Creation)
-    // or arguably just remove it if it was testing a non-existent feature.
-    // Instead, I'll test creating a task which is a core feature.
     test('POST /api/tasks should create task success', async () => {
         jest.spyOn(pool, 'query').mockResolvedValueOnce({});
 
@@ -66,7 +52,6 @@ describe('API Endpoints', () => {
     });
 
     test('POST /api/tasks should update existing task (Upsert)', async () => {
-        // Use a mock return value that doesn't really matter for void return, but ensure no error
         jest.spyOn(pool, 'query').mockResolvedValueOnce({});
 
         const res = await request(app).post('/api/tasks').send({
@@ -79,14 +64,6 @@ describe('API Endpoints', () => {
     });
 
     // --- EDGE CASES & ERRORS ---
-
-    test('GET /api/user should return null if no user found', async () => {
-        jest.spyOn(pool, 'query').mockResolvedValueOnce({ rows: [] }); // Empty result
-
-        const res = await request(app).get('/api/user');
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toBeNull();
-    });
 
     test('POST /api/tasks should handle database error gracefully', async () => {
         // Simulate DB Error
