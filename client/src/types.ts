@@ -19,6 +19,7 @@ export interface Comment {
 }
 
 export interface User {
+  email: string;
   name: string;
   avatar?: string;
 }

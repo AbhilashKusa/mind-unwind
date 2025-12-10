@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/screens/dashboard_screen.dart';
 import 'package:mobile/providers/auth_provider.dart';
-import 'package:mobile/widgets/task_card.dart';
-import 'package:mobile/widgets/stats_card.dart';
+
+
 
 void main() {
   testWidgets('Dashboard renders new UI components', (WidgetTester tester) async {

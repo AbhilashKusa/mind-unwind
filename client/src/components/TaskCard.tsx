@@ -12,13 +12,13 @@ interface TaskCardProps {
 const getPriorityStyle = (priority: Priority) => {
     switch (priority) {
         case Priority.High:
-            return 'bg-red-600 text-white border-red-600';
+            return 'bg-priority-high text-white border-priority-high';
         case Priority.Medium:
-            return 'bg-orange-400 text-white border-orange-400';
+            return 'bg-priority-medium text-white border-priority-medium';
         case Priority.Low:
-            return 'bg-emerald-500 text-white border-emerald-500';
+            return 'bg-priority-low text-white border-priority-low';
         default:
-            return 'bg-gray-200 text-black border-gray-200';
+            return 'bg-surface-accent text-brand border-surface-accent';
     }
 };
 
@@ -33,16 +33,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
         if (task.isCompleted || !task.dueDate) return false;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const due = new Date(task.dueDate + 'T00:00:00'); // Append time to force local time interpretation
+        const due = new Date(task.dueDate + 'T00:00:00');
         return due < today;
     }, [task.dueDate, task.isCompleted]);
 
     return (
         <div
             onClick={() => onClick(task)}
-            className={`group relative p-4 bg-white border-2 transition-all duration-200 cursor-pointer ${task.isCompleted
-                    ? 'border-gray-200 bg-gray-50 opacity-60'
-                    : 'border-black hover:shadow-sharp hover:-translate-y-1'
+            className={`group relative p-4 bg-surface border-2 transition-all duration-200 cursor-pointer ${task.isCompleted
+                ? 'border-surface-accent bg-surface-muted opacity-60'
+                : 'border-border hover:shadow-sharp hover:-translate-y-1'
                 }`}
         >
             <div className="flex items-start gap-3">
@@ -53,8 +53,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
                         onToggle(task.id);
                     }}
                     className={`mt-1 flex-shrink-0 w-5 h-5 border-2 flex items-center justify-center transition-all ${task.isCompleted
-                            ? 'bg-black border-black text-white'
-                            : 'border-black hover:bg-gray-100'
+                        ? 'bg-brand border-brand text-brand-foreground'
+                        : 'border-border hover:bg-surface-accent'
                         }`}
                     aria-label={task.isCompleted ? "Mark as incomplete" : "Mark as complete"}
                 >
@@ -64,12 +64,12 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
                 {/* Content */}
                 <div className="flex-grow min-w-0">
                     <div className="flex justify-between items-start gap-2">
-                        <h3 className={`font-bold text-base leading-tight truncate pr-2 ${task.isCompleted ? 'line-through text-gray-400' : 'text-black'}`}>
+                        <h3 className={`font-bold text-base leading-tight truncate pr-2 ${task.isCompleted ? 'line-through text-gray-400' : 'text-brand'}`}>
                             {task.title}
                         </h3>
                         <div className="flex gap-2 items-center flex-shrink-0">
                             {task.category && (
-                                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 border border-black text-black tracking-wider hidden sm:inline-block">
+                                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 border border-border text-brand tracking-wider hidden sm:inline-block">
                                     {task.category}
                                 </span>
                             )}
@@ -88,20 +88,20 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
                     {/* Metadata Footer */}
                     <div className="flex flex-wrap items-center gap-3 mt-3 text-[10px] font-bold text-gray-400 uppercase tracking-wide">
                         {task.dueDate && (
-                            <div className={`flex items-center gap-1 border-b border-transparent ${task.isCompleted ? 'text-gray-400' : isOverdue ? 'text-red-600 animate-pulse' : 'text-black'
+                            <div className={`flex items-center gap-1 border-b border-transparent ${task.isCompleted ? 'text-gray-400' : isOverdue ? 'text-priority-high animate-pulse' : 'text-brand'
                                 }`}>
                                 <CalendarIcon className="w-3 h-3" />
                                 <span>{task.dueDate} {isOverdue && '!'}</span>
                             </div>
                         )}
                         {hasSubtasks && (
-                            <div className="flex items-center gap-1 text-black">
+                            <div className="flex items-center gap-1 text-brand">
                                 <SplitIcon className="w-3 h-3" />
                                 <span>{completedSubtasks}/{totalSubtasks}</span>
                             </div>
                         )}
                         {task.comments?.length > 0 && (
-                            <div className="flex items-center gap-1 text-gray-500 group-hover:text-black transition-colors">
+                            <div className="flex items-center gap-1 text-gray-500 group-hover:text-brand transition-colors">
                                 <ChatIcon className="w-3 h-3" />
                                 <span>{task.comments.length}</span>
                             </div>
@@ -110,8 +110,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
 
                     {/* Progress Bar for subtasks */}
                     {hasSubtasks && !task.isCompleted && (
-                        <div className="mt-2 h-0.5 w-full bg-gray-100">
-                            <div className="h-full bg-black" style={{ width: `${progress}%` }}></div>
+                        <div className="mt-2 h-0.5 w-full bg-surface-accent">
+                            <div className="h-full bg-brand" style={{ width: `${progress}%` }}></div>
                         </div>
                     )}
                 </div>
@@ -122,7 +122,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
                         e.stopPropagation();
                         onDelete(task.id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-600 hover:bg-gray-100 absolute bottom-2 right-2"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-priority-high hover:bg-surface-accent absolute bottom-2 right-2"
                     aria-label="Delete task"
                 >
                     <TrashIcon className="w-4 h-4" />

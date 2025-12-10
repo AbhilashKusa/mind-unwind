@@ -41,16 +41,7 @@ app.use('/api/auth', authRoutes);
 // Task Routes
 app.use('/api/tasks', taskRoutes);
 
-// Legacy User Route (Keep for now or deprecate)
-// Since this is specific legacy logic, leaving it here or could make a route file
-app.get('/api/user', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM users LIMIT 1');
-    res.json(result.rows[0] || null);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+
 
 const startServer = (p) => {
   const server = app.listen(p, () => {

@@ -5,23 +5,33 @@ import { render, screen } from '@testing-library/react';
 import App from '../App';
 import React from 'react';
 
-// Mock the services to avoid API calls during component render
-vi.mock('../services/storage', () => ({
-    StorageService: {
-        checkConnection: vi.fn().mockResolvedValue(true),
+// Mock the services
+vi.mock('../services/api', () => ({
+    api: {
+        checkHealth: vi.fn().mockResolvedValue(true),
         getUser: vi.fn().mockResolvedValue({ name: 'Test User' }),
         getTasks: vi.fn().mockResolvedValue([]),
-        saveTask: vi.fn(),
+        createTask: vi.fn(),
+        updateTask: vi.fn(),
         deleteTask: vi.fn(),
     }
 }));
 
+vi.mock('../services/auth', () => ({
+    AuthService: {
+        getMe: vi.fn().mockResolvedValue({ name: 'Test User' }),
+        register: vi.fn(),
+        login: vi.fn(),
+    }
+}));
+
+
 describe('App', () => {
     it('renders the loading state initially or main app', async () => {
+        // Simulate existing session
+        localStorage.setItem('token', 'fake-token');
+
         render(<App />);
-        // Since we mocked checkConnection to resolve true immediately, 
-        // we might see the loading spinner briefly or the app.
-        // Let's check for something generic or wait.
 
         // Note: The App component has a loading state. 
         // "Connecting to Database..." text is present in loading state.

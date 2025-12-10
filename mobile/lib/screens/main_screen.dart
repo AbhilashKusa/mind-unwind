@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+
+
 import 'dashboard_screen.dart';
 import 'kanban_screen.dart';
 import 'calendar_screen.dart';

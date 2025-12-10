@@ -2,7 +2,7 @@ import React from 'react';
 import { Task } from '../types';
 import { BoardView } from './BoardView';
 import { CloseIcon, CalendarIcon } from './Icons';
-import { EmptyState } from './EmptyState';
+
 
 interface DayBoardModalProps {
     date: string;

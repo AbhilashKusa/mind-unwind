@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AppState, Task, User, ViewMode, Priority } from '../types';
+import { AppState, Task, User, ViewMode } from '../types';
 import { api } from '../services/api';
 import { AuthService } from '../services/auth';
 

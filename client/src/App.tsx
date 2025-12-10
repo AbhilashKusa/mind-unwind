@@ -54,9 +54,7 @@ const App: React.FC = () => {
 
     const generateId = () => Math.random().toString(36).substr(2, 9);
 
-    const handleLogin = async (newUser: any) => {
-        await setUser(newUser);
-    };
+
 
     const handleManualAdd = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -201,7 +199,7 @@ const App: React.FC = () => {
     const sortedTasks = getSortedTasks();
 
     return (
-        <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white">
+        <div className="min-h-screen bg-surface text-brand font-sans selection:bg-brand selection:text-brand-foreground">
             <Header />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -212,7 +210,7 @@ const App: React.FC = () => {
                         <CommandCenter />
 
                         {/* Automation Panel */}
-                        <div className="bg-gradient-to-br from-gray-900 to-black p-6 border-2 border-black shadow-sharp text-white">
+                        <div className="bg-gradient-to-br from-gray-900 to-black p-6 border-2 border-border shadow-sharp text-brand-foreground">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <h3 className="font-bold text-lg uppercase tracking-wide flex items-center gap-2">

@@ -1,7 +1,37 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { GeneratedTaskData, Task, Subtask, AICommandResponse } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+// Flag to track if AI features are available
+let aiInstance: GoogleGenAI | null = null;
+let aiInitializationError: string | null = null;
+
+// Lazy initialization - only create the instance when needed
+const getAI = (): GoogleGenAI => {
+  if (aiInitializationError) {
+    throw new Error(aiInitializationError);
+  }
+
+  if (!aiInstance) {
+    if (!apiKey || apiKey.trim() === '' || apiKey === 'undefined') {
+      aiInitializationError = 'VITE_GEMINI_API_KEY is not configured. AI features are disabled.';
+      console.warn(aiInitializationError);
+      throw new Error(aiInitializationError);
+    }
+
+    try {
+      aiInstance = new GoogleGenAI({ apiKey });
+      console.log("Gemini AI initialized successfully.");
+    } catch (e: any) {
+      aiInitializationError = `Failed to initialize Gemini AI: ${e.message}`;
+      console.error(aiInitializationError);
+      throw new Error(aiInitializationError);
+    }
+  }
+
+  return aiInstance;
+};
 
 const cleanJson = (text: string) => {
   if (!text) return "";
@@ -69,7 +99,7 @@ export const processUserCommand = async (
     `;
 
     // Using gemini-2.5-flash for command center to ensure speed and reduce timeouts
-    const makeRequest = () => ai.models.generateContent({
+    const makeRequest = () => getAI().models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
@@ -139,7 +169,7 @@ export const generateSubtasks = async (taskTitle: string, taskDescription?: stri
     const prompt = `Break down the task "${taskTitle}" ${taskDescription ? `(${taskDescription})` : ''} into 3-5 smaller, actionable subtasks.`;
 
     // Switch to gemini-2.5-flash for SPEED
-    const makeRequest = () => ai.models.generateContent({
+    const makeRequest = () => getAI().models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
@@ -190,7 +220,7 @@ export const updateTaskWithAI = async (currentTask: Task, userInstruction: strin
 
     // Switch to gemini-2.5-flash for SPEED. 
     // It is sufficient for JSON updates and much faster than Pro.
-    const makeRequest = () => ai.models.generateContent({
+    const makeRequest = () => getAI().models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
@@ -226,7 +256,7 @@ export const brainstormIdeas = async (goal: string): Promise<GeneratedTaskData[]
       Return JSON only.
     `;
 
-    const makeRequest = () => ai.models.generateContent({
+    const makeRequest = () => getAI().models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
@@ -274,7 +304,7 @@ export const optimizeSchedule = async (tasks: Task[]): Promise<Task[]> => {
       Return JSON Array of Task objects (simplified to id and updates).
     `;
 
-    const makeRequest = () => ai.models.generateContent({
+    const makeRequest = () => getAI().models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {

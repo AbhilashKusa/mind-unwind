@@ -9,35 +9,20 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: true,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
     },
     plugins: [
       react(),
-      VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
-        manifest: {
-          name: 'Mind Unwind',
-          short_name: 'MindUnwind',
-          description: 'AI-Powered Task Organization',
-          theme_color: '#ffffff',
-          icons: [
-            {
-              src: 'pwa-192x192.svg',
-              sizes: '192x192',
-              type: 'image/svg+xml'
-            },
-            {
-              src: 'pwa-512x512.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml'
-            }
-          ]
-        }
-      })
+      // VitePWA({...}) // Disabled for debugging
     ],
     define: {
-      'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      // 'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
     resolve: {
       alias: {

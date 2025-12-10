@@ -29,24 +29,9 @@ export const api = {
         }
     },
 
-    getUser: async (): Promise<User | null> => {
-        const res = await fetch(`${API_URL}/auth/me`, { headers: getHeaders() });
-        if (res.status === 401) {
-            localStorage.removeItem('token');
-            return null;
-        }
-        if (!res.ok) return null;
-        return res.json();
-    },
 
-    createUser: async (user: Partial<User>): Promise<void> => {
-        const res = await fetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify(user),
-        });
-        // No 401 check needed for register usually, but good practice if protected
-    },
+
+
 
     getTasks: async (): Promise<Task[]> => {
         const res = await fetch(`${API_URL}/tasks`, { headers: getHeaders() });

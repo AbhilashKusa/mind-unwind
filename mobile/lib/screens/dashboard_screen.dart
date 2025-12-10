@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 import '../models/task.dart';
 import '../widgets/task_card.dart';
 import '../widgets/stats_card.dart';
-import '../services/ai_service.dart';
+
 import '../widgets/brainstorm_sheet.dart';
 import 'task_detail_screen.dart';
 import 'profile_screen.dart';

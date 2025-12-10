@@ -1,1 +1,76 @@
 @import "tailwindcss";
+
+@theme {
+    /* Color Palette - Semantic Names */
+    --color-brand: var(--color-brand);
+    --color-brand-foreground: var(--color-brand-foreground);
+
+    --color-surface: var(--color-surface);
+    --color-surface-muted: var(--color-surface-muted);
+    --color-surface-accent: var(--color-surface-accent);
+
+    --color-border: var(--color-border);
+
+    /* Status Colors */
+    --color-priority-high: var(--color-priority-high);
+    --color-priority-medium: var(--color-priority-medium);
+    --color-priority-low: var(--color-priority-low);
+
+    /* Typography */
+    --font-sans: var(--font-sans);
+
+    /* Radii */
+    --radius-card: var(--radius-card);
+}
+
+:root {
+    /* Primitives */
+    --color-black: #000000;
+    --color-white: #ffffff;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+
+    /* Semantics */
+    --color-brand: var(--color-black);
+    --color-brand-foreground: var(--color-white);
+
+    --color-surface: var(--color-white);
+    --color-surface-muted: var(--color-gray-50);
+    --color-surface-accent: var(--color-gray-100);
+
+    --color-border: var(--color-black);
+    /* High contrast border style */
+
+    --color-priority-high: #dc2626;
+    /* red-600 */
+    --color-priority-medium: #fb923c;
+    /* orange-400 */
+    --color-priority-low: #10b981;
+    /* emerald-500 */
+
+    /* Typography */
+    --font-sans: "Inter", system-ui, sans-serif;
+
+    /* Spacing/Radius */
+    --radius-card: 0px;
+    /* Sharp edges for "Premium" feel */
+}
+
+@layer base {
+    body {
+        background-color: var(--color-surface);
+        color: var(--color-brand);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+    }
+}
+
+/* Utility Utilities */
+@utility shadow-sharp {
+    box-shadow: 4px 4px 0px 0px var(--color-black);
+}
+
+@utility shadow-sharp-sm {
+    box-shadow: 2px 2px 0px 0px var(--color-black);
+}
