@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { Task, Priority } from '../types';
 import { CheckCircleIcon, TrashIcon, SplitIcon, ChatIcon, CalendarIcon } from './Icons';
 
@@ -12,17 +14,20 @@ interface TaskCardProps {
 const getPriorityStyle = (priority: Priority) => {
     switch (priority) {
         case Priority.High:
-            return 'bg-priority-high text-white border-priority-high';
+            return 'bg-crimson/10 text-crimson border-crimson/50';
         case Priority.Medium:
-            return 'bg-priority-medium text-white border-priority-medium';
+            return 'bg-burnt-orange/10 text-burnt-orange border-burnt-orange/50';
         case Priority.Low:
-            return 'bg-priority-low text-white border-priority-low';
+            return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/50';
         default:
-            return 'bg-surface-accent text-brand border-surface-accent';
+            return 'bg-white/5 text-ivory border-white/20';
     }
 };
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }) => {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const checkRef = useRef<HTMLButtonElement>(null);
+
     const completedSubtasks = task.subtasks?.filter(st => st.isCompleted).length || 0;
     const totalSubtasks = task.subtasks?.length || 0;
     const hasSubtasks = totalSubtasks > 0;
@@ -37,24 +42,54 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
         return due < today;
     }, [task.dueDate, task.isCompleted]);
 
+    useGSAP(() => {
+        // Entrance animation
+        gsap.fromTo(cardRef.current,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }
+        );
+    }, { scope: cardRef });
+
+    const handleToggle = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        // Interaction animation
+        if (!task.isCompleted) {
+            gsap.to(checkRef.current, { scale: 1.2, duration: 0.1, yoyo: true, repeat: 1 });
+        }
+
+        onToggle(task.id);
+    };
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        // Exit animation
+        gsap.to(cardRef.current, {
+            x: 50,
+            opacity: 0,
+            duration: 0.3,
+            ease: "power2.in",
+            onComplete: () => onDelete(task.id)
+        });
+    };
+
     return (
         <div
+            ref={cardRef}
             onClick={() => onClick(task)}
-            className={`group relative p-4 bg-surface border-2 transition-all duration-200 cursor-pointer ${task.isCompleted
-                ? 'border-surface-accent bg-surface-muted opacity-60'
-                : 'border-border hover:shadow-sharp hover:-translate-y-1'
+            className={`group relative p-5 transition-all duration-300 cursor-pointer border rounded-sm ${task.isCompleted
+                ? 'bg-surface-muted/20 border-white/5 opacity-50'
+                : 'bg-surface-muted/40 backdrop-blur-sm border-gold-muted/20 hover:border-gold/50 hover:shadow-glow-sm hover:-translate-y-0.5'
                 }`}
         >
-            <div className="flex items-start gap-3">
-                {/* Checkbox */}
+            <div className="flex items-start gap-4">
+                {/* Custom Checkbox */}
                 <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onToggle(task.id);
-                    }}
-                    className={`mt-1 flex-shrink-0 w-5 h-5 border-2 flex items-center justify-center transition-all ${task.isCompleted
-                        ? 'bg-brand border-brand text-brand-foreground'
-                        : 'border-border hover:bg-surface-accent'
+                    ref={checkRef}
+                    onClick={handleToggle}
+                    className={`mt-1 flex-shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-300 ${task.isCompleted
+                        ? 'bg-gold border-gold text-emerald-deep'
+                        : 'border-gold-muted/50 hover:border-gold hover:bg-gold/10'
                         }`}
                     aria-label={task.isCompleted ? "Mark as incomplete" : "Mark as complete"}
                 >
@@ -64,65 +99,62 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
                 {/* Content */}
                 <div className="flex-grow min-w-0">
                     <div className="flex justify-between items-start gap-2">
-                        <h3 className={`font-bold text-base leading-tight truncate pr-2 ${task.isCompleted ? 'line-through text-gray-400' : 'text-brand'}`}>
+                        <h3 className={`font-serif text-lg leading-tight truncate pr-2 transition-colors ${task.isCompleted ? 'line-through text-gold-muted' : 'text-ivory group-hover:text-gold'}`}>
                             {task.title}
                         </h3>
                         <div className="flex gap-2 items-center flex-shrink-0">
                             {task.category && (
-                                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 border border-border text-brand tracking-wider hidden sm:inline-block">
+                                <span className="text-[9px] uppercase font-bold px-2 py-0.5 border border-gold-muted/30 text-gold-muted tracking-widest hidden sm:inline-block rounded-full">
                                     {task.category}
                                 </span>
                             )}
-                            <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 border ${getPriorityStyle(task.priority)} tracking-wider shadow-sm`}>
+                            <span className={`text-[9px] uppercase font-bold px-2 py-0.5 border rounded-full ${getPriorityStyle(task.priority)} tracking-widest`}>
                                 {task.priority}
                             </span>
                         </div>
                     </div>
 
                     {task.description && (
-                        <p className={`mt-1 text-xs text-gray-600 line-clamp-1 ${task.isCompleted ? 'line-through text-gray-400' : ''}`}>
+                        <p className={`mt-2 text-sm text-ivory-dim/80 line-clamp-2 font-sans ${task.isCompleted ? 'line-through' : ''}`}>
                             {task.description}
                         </p>
                     )}
 
                     {/* Metadata Footer */}
-                    <div className="flex flex-wrap items-center gap-3 mt-3 text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+                    <div className="flex flex-wrap items-center gap-4 mt-4 text-[10px] font-bold text-gold-muted uppercase tracking-widest">
                         {task.dueDate && (
-                            <div className={`flex items-center gap-1 border-b border-transparent ${task.isCompleted ? 'text-gray-400' : isOverdue ? 'text-priority-high animate-pulse' : 'text-brand'
+                            <div className={`flex items-center gap-1.5 ${task.isCompleted ? 'text-gold-muted' : isOverdue ? 'text-crimson animate-pulse' : 'text-gold'
                                 }`}>
-                                <CalendarIcon className="w-3 h-3" />
+                                <CalendarIcon className="w-3.5 h-3.5" />
                                 <span>{task.dueDate} {isOverdue && '!'}</span>
                             </div>
                         )}
                         {hasSubtasks && (
-                            <div className="flex items-center gap-1 text-brand">
-                                <SplitIcon className="w-3 h-3" />
-                                <span>{completedSubtasks}/{totalSubtasks}</span>
+                            <div className="flex items-center gap-1.5 hover:text-gold transition-colors">
+                                <SplitIcon className="w-3.5 h-3.5" />
+                                <span>{completedSubtasks}/{totalSubtasks} Subtasks</span>
                             </div>
                         )}
                         {task.comments?.length > 0 && (
-                            <div className="flex items-center gap-1 text-gray-500 group-hover:text-brand transition-colors">
-                                <ChatIcon className="w-3 h-3" />
+                            <div className="flex items-center gap-1.5 hover:text-gold transition-colors">
+                                <ChatIcon className="w-3.5 h-3.5" />
                                 <span>{task.comments.length}</span>
                             </div>
                         )}
                     </div>
 
-                    {/* Progress Bar for subtasks */}
+                    {/* Elegant Progress Bar */}
                     {hasSubtasks && !task.isCompleted && (
-                        <div className="mt-2 h-0.5 w-full bg-surface-accent">
-                            <div className="h-full bg-brand" style={{ width: `${progress}%` }}></div>
+                        <div className="mt-3 h-0.5 w-full bg-surface-muted/50 rounded-full overflow-hidden">
+                            <div className="h-full bg-gold shadow-[0_0_10px_#d4af37]" style={{ width: `${progress}%` }}></div>
                         </div>
                     )}
                 </div>
 
-                {/* Delete Action */}
+                {/* Delete Action (Gold Dust) */}
                 <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(task.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-priority-high hover:bg-surface-accent absolute bottom-2 right-2"
+                    onClick={handleDelete}
+                    className="opacity-0 group-hover:opacity-100 transition-all duration-300 p-2 text-gold-muted hover:text-crimson hover:bg-crimson/10 rounded-full absolute bottom-2 right-2"
                     aria-label="Delete task"
                 >
                     <TrashIcon className="w-4 h-4" />

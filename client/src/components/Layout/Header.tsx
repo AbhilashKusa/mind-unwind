@@ -12,39 +12,44 @@ export const Header: React.FC = () => {
     if (!user) return null;
 
     return (
-        <header className="bg-surface border-b-2 border-border sticky top-0 z-10">
+        <header className="bg-emerald-deep/90 backdrop-blur-md border-b border-gold-muted/20 sticky top-0 z-50 transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="bg-brand p-2.5 border-2 border-brand">
-                        <BrainIcon className="w-6 h-6 text-brand-foreground" />
+                <div className="flex items-center gap-4 group cursor-default">
+                    <div className="bg-gold/10 p-2 rounded-full border border-gold/30 group-hover:border-gold/60 transition-colors">
+                        <BrainIcon className="w-6 h-6 text-gold" />
                     </div>
-                    <h1 className="text-2xl font-bold tracking-tight text-brand hidden sm:block">
+                    <h1 className="text-2xl font-serif font-medium tracking-tight text-gold hidden sm:block">
                         MindUnwind
                     </h1>
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-600">
-                        <CloudCheckIcon className="w-4 h-4" />
-                        <span>DB Connected</span>
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/80">
+                        <CloudCheckIcon className="w-3.5 h-3.5" />
+                        <span>Connected</span>
                     </div>
-                    <div className="text-xs font-bold border-2 border-border px-3 py-1 bg-surface-muted hidden sm:block shadow-sharp-sm uppercase tracking-wider text-brand">
-                        {totalCount > 0 ? `${completedCount}/${totalCount} DONE` : 'READY'}
+                    <div className="text-[10px] font-bold border border-gold-muted/30 px-4 py-1.5 bg-emerald-light/30 hidden sm:block rounded-full uppercase tracking-widest text-gold-muted shadow-sm backdrop-blur-sm">
+                        {totalCount > 0 ? `${completedCount}/${totalCount} Completed` : 'Ready'}
                     </div>
-                    <button onClick={() => useStore.getState().setProfileOpen(true)} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-                        <div className="bg-brand p-1.5 rounded-full">
-                            <span className="w-4 h-4 text-brand-foreground text-xs flex items-center justify-center font-bold">
-                                {user.name.charAt(0).toUpperCase()}
-                            </span>
+                    <button
+                        onClick={() => useStore.getState().setProfileOpen(true)}
+                        className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
+                    >
+                        <div className="bg-gradient-to-br from-gold-muted to-gold p-[1px] rounded-full">
+                            <div className="bg-emerald-deep rounded-full p-1">
+                                <span className="w-6 h-6 text-gold text-xs flex items-center justify-center font-serif italic">
+                                    {user.name.charAt(0).toUpperCase()}
+                                </span>
+                            </div>
                         </div>
-                        <span className="text-xs font-bold uppercase tracking-wide hidden sm:inline-block text-brand">{user.name}</span>
+                        <span className="text-xs font-bold uppercase tracking-widest hidden sm:inline-block text-ivory group-hover:text-gold transition-colors">{user.name}</span>
                     </button>
                 </div>
             </div>
-            {/* Progress Bar */}
-            <div className="h-1.5 w-full bg-surface-muted border-b border-border">
+            {/* Elegant Progress Line */}
+            <div className="h-[1px] w-full bg-white/5 relative overflow-hidden">
                 <div
-                    className="h-full bg-brand transition-all duration-500 ease-out"
+                    className="h-full bg-gold shadow-[0_0_10px_#d4af37] transition-all duration-1000 ease-out"
                     style={{ width: `${progress}%` }}
                 />
             </div>

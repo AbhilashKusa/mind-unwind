@@ -29,19 +29,19 @@ describe('LoginScreen Integration', () => {
     it('renders login form by default', () => {
         render(<LoginScreen onLogin={() => { }} />);
         expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
-        expect(screen.getByPlaceholderText(/email address/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/enter your email/i)).toBeInTheDocument();
     });
 
     it('switches to signup form', () => {
         render(<LoginScreen onLogin={() => { }} />);
         const switchButton = screen.getByText(/don't have an account\? sign up/i);
         fireEvent.click(switchButton);
-        expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /begin your journey/i })).toBeInTheDocument();
     });
 
     it('calls login action on submit', async () => {
         render(<LoginScreen onLogin={() => { }} />);
-        fireEvent.change(screen.getByPlaceholderText(/email address/i), { target: { value: 'test@test.com' } });
+        fireEvent.change(screen.getByPlaceholderText(/enter your email/i), { target: { value: 'test@test.com' } });
         fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
         fireEvent.click(screen.getByRole('button', { name: /login/i }));
 

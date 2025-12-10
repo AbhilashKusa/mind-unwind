@@ -79,17 +79,17 @@ export const CommandCenter: React.FC = () => {
     };
 
     return (
-        <div className="bg-white p-6 border-2 border-black shadow-sharp flex flex-col h-[600px] lg:h-[calc(100vh-160px)] sticky top-28">
-            <div className="mb-6 pb-4 border-b-2 border-gray-100 flex justify-between items-start">
+        <div className="bg-emerald-deep/40 backdrop-blur-xl p-8 border border-gold-muted/20 flex flex-col h-[600px] lg:h-[calc(100vh-160px)] sticky top-28 rounded-sm shadow-glow-gold transition-all hover:border-gold-muted/40 group">
+            <div className="mb-8 pb-6 border-b border-gold-muted/10 flex justify-between items-start">
                 <div>
-                    <h2 className="text-xl font-bold text-black flex items-center gap-2 uppercase tracking-wide">
+                    <h2 className="text-2xl font-serif text-gold flex items-center gap-3">
                         Command Center
                     </h2>
-                    <p className="text-[10px] font-bold text-gray-500 mt-2 uppercase tracking-widest">
-                        AI Context Aware • Gemini 3.0 Pro
+                    <p className="text-[10px] font-sans font-bold text-gray-500 mt-2 uppercase tracking-[0.25em]">
+                        Your Digital Butler • Gemini 3.0 Pro
                     </p>
                 </div>
-                <div className="p-2 bg-black text-white">
+                <div className="p-2 border border-gold/30 rounded-full bg-gold/5 text-gold animate-pulse-slow">
                     <MagicIcon className="w-5 h-5" />
                 </div>
             </div>
@@ -97,42 +97,42 @@ export const CommandCenter: React.FC = () => {
             <textarea
                 value={commandInput}
                 onChange={handleCommandChange}
-                placeholder={`Type commands like:\n"Add a meeting with Joe tomorrow"\n"Move all work tasks to Friday"\n"Delete the grocery task"`}
-                className="flex-grow w-full p-4 bg-gray-50 border-2 border-gray-200 focus:border-black focus:bg-white transition-all resize-none text-black placeholder:text-gray-400 focus:outline-none text-sm leading-relaxed font-mono"
+                placeholder={`Tell me what needs to be done...\n\n"Add a dinner meeting with Sarah"\n"Reschedule tomorrow's tasks for Monday"`}
+                className="flex-grow w-full p-6 bg-emerald-deep/60 border border-gold-muted/20 focus:border-gold/60 focus:bg-emerald-deep/80 transition-all resize-none text-ivory placeholder:text-gray-600 focus:outline-none text-sm leading-loose font-serif italic rounded-sm scrollbar-thin"
                 spellCheck={false}
             />
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-8 space-y-4">
                 <button
                     onClick={handleProcessCommand}
                     disabled={isProcessing || !commandInput.trim()}
-                    className={`w-full py-4 px-6 font-bold text-white border-2 border-black flex items-center justify-center gap-3 transition-all transform active:translate-y-1 active:shadow-none uppercase tracking-widest
+                    className={`w-full py-4 px-6 font-bold text-emerald-deep flex items-center justify-center gap-3 transition-all transform uppercase tracking-[0.2em] text-xs relative overflow-hidden
                     ${isProcessing || !commandInput.trim()
-                            ? 'bg-gray-300 border-gray-300 cursor-not-allowed text-gray-500'
-                            : 'bg-black shadow-sharp hover:shadow-sharp-hover hover:-translate-y-0.5'
+                            ? 'bg-gray-800/50 cursor-not-allowed text-gray-600'
+                            : 'bg-gradient-to-r from-gold-muted via-gold to-gold-muted hover:shadow-glow-gold hover:scale-[1.02]'
                         }`}
                 >
                     {isProcessing ? (
                         <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="w-4 h-4 border-2 border-emerald-deep/30 border-t-emerald-deep rounded-full animate-spin" />
                             Processing...
                         </>
                     ) : (
                         <>
                             <SparklesIcon className="w-4 h-4" />
-                            Execute Command
+                            Execute
                         </>
                     )}
                 </button>
 
                 {aiResponse && (
-                    <div className="p-3 bg-gray-50 border-2 border-black text-xs font-mono animate-in fade-in slide-in-from-top-2">
-                        <span className="font-bold mr-2">AI:</span>
+                    <div className="p-4 bg-emerald-light/20 border border-gold-muted/20 text-xs text-ivory/90 font-sans leading-relaxed animate-in fade-in slide-in-from-top-2 rounded-sm italic">
+                        <span className="font-bold mr-2 text-gold not-italic uppercase tracking-wider">Butler:</span>
                         {aiResponse}
                     </div>
                 )}
                 {error && (
-                    <p className="text-red-600 text-xs font-bold text-center mt-3 uppercase">
+                    <p className="text-crimson text-xs font-bold text-center mt-3 uppercase tracking-wider">
                         {error}
                     </p>
                 )}

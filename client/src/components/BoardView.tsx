@@ -22,20 +22,13 @@ const DroppableColumn = ({ col, tasks, onToggle, onDelete, onClick }: any) => {
     });
 
     return (
-        <div ref={setNodeRef} className="bg-gray-50 border-2 border-black/10 p-4 min-h-[500px]">
-            <h3 className="font-bold text-lg uppercase tracking-wider mb-4 border-b-2 border-black pb-2 flex justify-between">
-                {col.title}
-                <span className="bg-black text-white px-2 py-0.5 text-xs rounded-full">
-                    {tasks.length}
-                </span>
-            </h3>
-
+        <div ref={setNodeRef} className={`rounded-sm min-h-[400px] transition-colors duration-300 ${col.id === 'done' ? 'bg-emerald-light/5' : ''}`}>
             <SortableContext
                 id={col.id}
                 items={tasks.map((t: Task) => t.id)}
                 strategy={verticalListSortingStrategy}
             >
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {tasks.map((task: Task) => (
                         <DraggableTaskCard
                             key={task.id}
@@ -97,22 +90,33 @@ export const BoardView: React.FC<BoardViewProps> = ({ tasks, onTaskClick }) => {
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full overflow-x-auto pb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full overflow-x-auto pb-4">
                 {COLUMNS.map(col => (
-                    <DroppableColumn
-                        key={col.id}
-                        col={col}
-                        tasks={col.id === 'todo' ? todoTasks : doneTasks}
-                        onToggle={toggleTask}
-                        onDelete={deleteTask}
-                        onClick={onTaskClick}
-                    />
+                    <div key={col.id} className="min-h-[500px]">
+                        {/* Column Header */}
+                        <div className="flex items-center justify-between mb-6 pb-2 border-b border-gold-muted/20">
+                            <h3 className="font-serif text-xl text-gold tracking-wide">
+                                {col.title}
+                            </h3>
+                            <span className="bg-emerald-light/40 border border-gold/20 text-ivory/80 px-2 py-0.5 text-[10px] font-bold rounded-full">
+                                {col.id === 'todo' ? todoTasks.length : doneTasks.length}
+                            </span>
+                        </div>
+
+                        <DroppableColumn
+                            col={col}
+                            tasks={col.id === 'todo' ? todoTasks : doneTasks}
+                            onToggle={toggleTask}
+                            onDelete={deleteTask}
+                            onClick={onTaskClick}
+                        />
+                    </div>
                 ))}
             </div>
 
             <DragOverlay>
                 {activeId ? (
-                    <div className="opacity-80 rotate-3 cursor-grabbing">
+                    <div className="opacity-90 rotate-1 cursor-grabbing shadow-glow-gold scale-105">
                         <TaskCard
                             task={tasks.find(t => t.id === activeId)!}
                             onToggle={() => { }}

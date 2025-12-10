@@ -6,6 +6,6 @@ import { EmptyState } from '../components/EmptyState';
 describe('EmptyState', () => {
     it('renders empty state message', () => {
         render(<EmptyState />);
-        expect(screen.getByText(/All Clear/i)).toBeInTheDocument();
+        expect(screen.getByText(/Tranquility Achieved/i)).toBeInTheDocument();
     });
 });

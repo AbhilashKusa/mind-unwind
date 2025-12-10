@@ -34,12 +34,6 @@ describe('Integration: Add Task', () => {
         await screen.findByText(/MindUnwind/i);
 
         // Find Quick Add button (PlusIcon)
-
-        // Note: Title attribute might not work as role name directly, need to check how it's queried.
-        // Or find by class or icon.
-        // Let's rely on finding by title attribute if possible or role.
-        // The button has title="Quick Add Task"
-
         let quickAddBtn = screen.getByTitle('Quick Add Task');
         fireEvent.click(quickAddBtn);
 
@@ -47,11 +41,13 @@ describe('Integration: Add Task', () => {
         expect(screen.getByText('New Task')).toBeInTheDocument();
 
         // Fill input
-        const input = screen.getByPlaceholderText('Task Title');
+        // Updated placeholder to match Sabyasachi design
+        const input = screen.getByPlaceholderText('What needs to be done?');
         fireEvent.change(input, { target: { value: 'Integration Task' } });
 
         // Submit
-        const submitBtn = screen.getByText('Add Task');
+        // Updated button text to match Sabyasachi design
+        const submitBtn = screen.getByText('Add to Sanctuary');
         fireEvent.click(submitBtn);
 
         // Expect task to appear in list (Optimistic update)

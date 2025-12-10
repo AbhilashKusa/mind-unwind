@@ -56,7 +56,9 @@ export interface AICommandResponse {
   aiResponse: string; // A brief message from the AI explaining what it did
 }
 
-export type ViewMode = 'list' | 'board' | 'calendar';
+export type ViewMode = 'list' | 'board' | 'calendar' | 'concierge';
+export type ThemeType = 'royal' | 'serenity' | 'minimal' | 'midnight' | 'earthen';
+
 
 export interface AppState {
   user: User | null;

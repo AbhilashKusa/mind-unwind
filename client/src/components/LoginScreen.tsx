@@ -34,84 +34,97 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-muted p-4">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-black uppercase tracking-tighter mb-2 text-brand">Mind Unwind</h1>
-        <p className="text-gray-500 font-bold tracking-wide uppercase text-xs">AI-Powered Task Organizer</p>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Ornaments */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20" style={{
+        backgroundImage: 'radial-gradient(circle at 50% 50%, #d4af37 1px, transparent 1px)',
+        backgroundSize: '40px 40px'
+      }}></div>
+
+      <div className="text-center mb-10 relative z-10">
+        <h1 className="text-5xl md:text-6xl font-serif font-medium tracking-tight mb-2 text-gold animate-in fade-in slide-in-from-bottom-4 duration-700">Mind Unwind</h1>
+        <p className="text-ivory-dim font-sans text-xs tracking-[0.3em] uppercase">The Sanctuary for your Thoughts</p>
       </div>
 
-      <div className="bg-surface p-8 border-2 border-border shadow-sharp w-full max-w-sm">
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-brand rounded-full flex items-center justify-center text-brand-foreground">
-            <UserIcon className="w-8 h-8" />
+      <div className="bg-emerald-light/40 backdrop-blur-md p-10 border border-gold-muted/30 shadow-glow-gold w-full max-w-md relative z-10 animate-in fade-in zoom-in-95 duration-500">
+
+        {/* Decorative Corner */}
+        <div className="absolute top-2 left-2 w-4 h-4 border-t border-l border-gold/50"></div>
+        <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-gold/50"></div>
+        <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-gold/50"></div>
+        <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-gold/50"></div>
+
+        <div className="flex justify-center mb-8">
+          <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center text-gold">
+            <UserIcon className="w-5 h-5" />
           </div>
         </div>
 
-        <h2 className="text-xl font-bold text-center uppercase tracking-wider mb-6 text-brand">
-          {isRegister ? 'Create Account' : 'Welcome Back'}
+        <h2 className="text-2xl font-serif text-center text-ivory mb-8">
+          {isRegister ? 'Begin Your Journey' : 'Welcome Back'}
         </h2>
 
         {authError && (
-          <div className="bg-red-50 border-2 border-priority-high text-priority-high p-3 mb-4 text-xs font-bold uppercase">
+          <div className="bg-crimson/20 border border-crimson/50 text-ivory p-3 mb-6 text-xs text-center font-sans tracking-wide">
             {authError}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {isRegister && (
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Name</label>
+            <div className="group">
+              <label className="block text-[10px] font-bold uppercase text-gold-muted mb-2 tracking-widest">Name</label>
               <input
                 required
                 type="text"
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-3 bg-surface-muted border-2 border-border/20 focus:border-brand outline-none font-bold text-sm text-brand placeholder:text-gray-400"
-                placeholder="YOUR NAME"
+                className="w-full p-3 bg-emerald-deep/50 border-b border-gold-muted/30 focus:border-gold outline-none text-ivory placeholder:text-emerald-light/50 transition-colors font-serif"
+                placeholder="Enter your full name"
               />
             </div>
           )}
 
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Email</label>
+          <div className="group">
+            <label className="block text-[10px] font-bold uppercase text-gold-muted mb-2 tracking-widest">Email</label>
             <input
               required
               type="email"
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 bg-surface-muted border-2 border-border/20 focus:border-brand outline-none font-bold text-sm text-brand placeholder:text-gray-400"
-              placeholder="EMAIL ADDRESS"
+              className="w-full p-3 bg-emerald-deep/50 border-b border-gold-muted/30 focus:border-gold outline-none text-ivory placeholder:text-emerald-light/50 transition-colors font-serif"
+              placeholder="Enter your email"
             />
           </div>
 
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Password</label>
+          <div className="group">
+            <label className="block text-[10px] font-bold uppercase text-gold-muted mb-2 tracking-widest">Password</label>
             <input
               required
               type="password"
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 bg-surface-muted border-2 border-border/20 focus:border-brand outline-none font-bold text-sm text-brand placeholder:text-gray-400"
-              placeholder="PASSWORD"
+              className="w-full p-3 bg-emerald-deep/50 border-b border-gold-muted/30 focus:border-gold outline-none text-ivory placeholder:text-emerald-light/50 transition-colors font-serif"
+              placeholder="Enter your password"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-brand text-brand-foreground font-bold uppercase tracking-widest border-2 border-brand hover:bg-surface hover:text-brand transition-colors disabled:opacity-50 mt-2 cursor-pointer"
+            className="w-full py-3.5 bg-gradient-to-r from-gold-muted via-gold to-gold-muted text-emerald-deep font-bold uppercase tracking-[0.2em] text-xs hover:shadow-glow-gold transition-all duration-300 disabled:opacity-50 mt-4 cursor-pointer relative overflow-hidden group"
           >
-            {loading ? 'Processing...' : (isRegister ? 'Sign Up' : 'Login')}
+            <span className="relative z-10">{loading ? 'Processing...' : (isRegister ? 'Sign Up' : 'Login')}</span>
           </button>
         </form>
 
-        <div className="mt-6 text-center border-t-2 border-surface-accent pt-4">
+        <div className="mt-8 text-center pt-6 border-t border-gold-muted/10">
           <button
             onClick={() => { setIsRegister(!isRegister); clearAuthError(); }}
-            className="text-xs font-bold text-gray-400 hover:text-brand uppercase tracking-wider"
+            className="text-xs font-serif italic text-gold-muted hover:text-gold transition-colors border-b border-transparent hover:border-gold"
           >
             {isRegister ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
           </button>

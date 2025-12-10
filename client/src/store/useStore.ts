@@ -1,9 +1,12 @@
 import { create } from 'zustand';
-import { AppState, Task, User, ViewMode } from '../types';
+import { AppState, Task, User, ViewMode, ThemeType } from '../types';
 import { api } from '../services/api';
 import { AuthService } from '../services/auth';
 
 interface StoreState extends AppState {
+    theme: ThemeType;
+    setTheme: (theme: ThemeType) => void;
+
     token: string | null;
     authError: string | null;
 
@@ -38,6 +41,8 @@ export const useStore = create<StoreState>((set, get) => ({
     viewMode: 'list',
     isBrainstormOpen: false,
     isManualAddOpen: false,
+    theme: (localStorage.getItem('theme') as ThemeType) || 'royal', // Load from LS
+
     token: localStorage.getItem('token'),
     authError: null,
 
@@ -175,6 +180,11 @@ export const useStore = create<StoreState>((set, get) => ({
     setViewMode: (mode) => set({ viewMode: mode }),
     setBrainstormOpen: (isOpen) => set({ isBrainstormOpen: isOpen }),
     setManualAddOpen: (isOpen) => set({ isManualAddOpen: isOpen }),
+    setTheme: (theme) => {
+        localStorage.setItem('theme', theme);
+        set({ theme });
+    },
+
 
     // Profile
     isProfileOpen: false,

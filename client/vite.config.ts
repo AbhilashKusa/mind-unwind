@@ -1,38 +1,54 @@
-import path from 'path';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '.', '');
-  return {
-    server: {
-      port: 3000,
-      host: true,
-      proxy: {
-        '/api': {
-          target: 'http://localhost:3001',
-          changeOrigin: true,
-          secure: false,
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      manifest: {
+        name: 'Mind Unwind',
+        short_name: 'MindUnwind',
+        description: 'AI-powered task organization for peace of mind.',
+        theme_color: '#0a110e',
+        background_color: '#0a110e',
+        icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      }
+    })
+  ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-gsap': ['gsap', '@gsap/react'],
+          'vendor-ui': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities']
         }
       }
     },
-    plugins: [
-      react(),
-      // VitePWA({...}) // Disabled for debugging
-    ],
-    define: {
-      // 'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, './src'),
+    chunkSizeWarningLimit: 1000
+  },
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
       }
-    },
-    test: {
-      globals: true,
-      environment: 'jsdom',
-      setupFiles: './src/tests/setup.ts',
     }
-  };
+  }
 });
