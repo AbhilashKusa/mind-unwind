@@ -25,6 +25,23 @@ const initDb = async () => {
       );
     `);
 
+        // Create tasks table if not exists with correct schema
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS tasks (
+                id TEXT PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                priority VARCHAR(50),
+                description TEXT,
+                due_date DATE,
+                category VARCHAR(100),
+                is_completed BOOLEAN DEFAULT FALSE,
+                user_id INTEGER,
+                subtasks JSONB DEFAULT '[]'::jsonb,
+                comments JSONB DEFAULT '[]'::jsonb,
+                created_at BIGINT
+            );
+        `);
+
         // Migrations
         try { await client.query(`ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE;`); } catch (e) { }
         try { await client.query(`ALTER TABLE users ADD COLUMN password_hash VARCHAR(255);`); } catch (e) { }
@@ -36,9 +53,21 @@ const initDb = async () => {
                 try { await client.query(`ALTER TABLE users ADD COLUMN id SERIAL UNIQUE;`); } catch (ex) { }
             }
         }
+
+        // Task Migrations for existing tables
         try { await client.query(`ALTER TABLE tasks ADD COLUMN user_id INTEGER;`); } catch (e) { }
         try { await client.query(`ALTER TABLE tasks ADD COLUMN subtasks JSONB DEFAULT '[]'::jsonb;`); } catch (e) { }
         try { await client.query(`ALTER TABLE tasks ADD COLUMN comments JSONB DEFAULT '[]'::jsonb;`); } catch (e) { }
+
+        // Migrate ID column from INTEGER/SERIAL to TEXT if needed
+        try {
+            await client.query(`ALTER TABLE tasks ALTER COLUMN id TYPE TEXT;`);
+        } catch (e) {
+            // Column may already be TEXT or have conversion issues
+            if (!e.message.includes('already type')) {
+                console.log('ID migration note:', e.message);
+            }
+        }
 
         console.log("✅ DB Migration Checked");
         client.release();

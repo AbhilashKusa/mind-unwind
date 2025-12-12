@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { UserIcon } from './Icons';
+import { User } from 'lucide-react';
 
 interface LoginScreenProps {
   onLogin: (user: any) => void;
@@ -56,7 +56,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 
         <div className="flex justify-center mb-8">
           <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center text-gold">
-            <UserIcon className="w-5 h-5" />
+            <User className="w-5 h-5" />
           </div>
         </div>
 

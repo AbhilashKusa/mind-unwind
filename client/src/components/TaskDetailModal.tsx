@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Task, Subtask, Comment, Priority } from '../types';
 import { generateSubtasks, updateTaskWithAI } from '../services/gemini';
-import { CloseIcon, SplitIcon, ChatIcon, SendIcon, SparklesIcon, CheckCircleIcon, UserIcon, BrainIcon, CalendarIcon, MessageSquareIcon, PlusIcon } from './Icons';
+import { X, GitCommitVertical, MessageSquare, Send, Sparkles, CheckCircle, User, Brain, Calendar, Plus, Focus } from 'lucide-react';
 
 interface TaskDetailModalProps {
     task: Task;
     isOpen: boolean;
     onClose: () => void;
     onUpdate: (updatedTask: Task) => void;
+    onFocus?: () => void;
 }
 
-const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose, onUpdate }) => {
+const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose, onUpdate, onFocus }) => {
     const [activeTab, setActiveTab] = useState<'details' | 'chat'>('details');
     const [commentInput, setCommentInput] = useState('');
     const [isProcessingAI, setIsProcessingAI] = useState(false);
@@ -147,7 +148,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                             className={`w-7 h-7 rounded-sm border flex items-center justify-center transition-all duration-300 ${task.isCompleted ? 'bg-gold border-gold text-emerald-deep shadow-glow-sm' : 'border-gold/30 hover:border-gold hover:bg-emerald-light/20'
                                 }`}
                         >
-                            {task.isCompleted && <CheckCircleIcon className="w-5 h-5" />}
+                            {task.isCompleted && <CheckCircle className="w-5 h-5" />}
                         </button>
 
                         <div className="min-w-0 flex-1">
@@ -165,13 +166,24 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                             </div>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 text-gold-muted hover:text-gold transition-colors flex-shrink-0"
-                    >
-                        <CloseIcon className="w-6 h-6" />
-                    </button>
+                    {onFocus && (
+                        <button
+                            onClick={onFocus}
+                            className="hidden sm:flex items-center gap-2 px-3 py-1.5 border border-gold/30 bg-gold/10 text-gold text-[10px] font-bold uppercase tracking-widest hover:bg-gold hover:text-emerald-deep transition-all ml-4"
+                            title="Enter Focus Chamber"
+                        >
+                            <Focus className="w-3.5 h-3.5" />
+                            <span>Focus</span>
+                        </button>
+                    )}
                 </div>
+                <button
+                    onClick={onClose}
+                    className="p-2 text-gold-muted hover:text-gold transition-colors flex-shrink-0"
+                >
+                    <X className="w-6 h-6" />
+                </button>
+
 
                 {/* Tabs */}
                 <div className="flex border-b border-gold-muted/10 flex-shrink-0 bg-emerald-deep relative z-10">
@@ -181,7 +193,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                             }`}
                     >
                         <div className="flex items-center justify-center gap-2 relative z-10">
-                            <SplitIcon className="w-3.5 h-3.5" />
+                            <GitCommitVertical className="w-3.5 h-3.5" />
                             Structure
                         </div>
                         {activeTab === 'details' && (
@@ -196,7 +208,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                     ${activeTab === 'chat' ? 'text-gold' : 'text-gold-muted/50 hover:text-ivory'}
                 `}
                     >
-                        <ChatIcon className="w-3.5 h-3.5" />
+                        <MessageSquare className="w-3.5 h-3.5" />
                         Refine
                         {task.comments?.length > 0 && (
                             <span className={`ml-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] ${activeTab === 'chat' ? 'bg-gold text-emerald-deep' : 'bg-emerald-light text-gold-muted'}`}>
@@ -261,7 +273,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                             onChange={(e) => onUpdate({ ...task, dueDate: e.target.value })}
                                             className="w-full bg-emerald-deep border-b border-gold-muted/30 text-xs font-sans text-ivory py-2 px-1 focus:border-gold outline-none uppercase tracking-wide transition-colors"
                                         />
-                                        <CalendarIcon className="w-3.5 h-3.5 absolute right-1 top-1/2 -translate-y-1/2 text-gold-muted pointer-events-none group-hover:text-gold" />
+                                        <Calendar className="w-3.5 h-3.5 absolute right-1 top-1/2 -translate-y-1/2 text-gold-muted pointer-events-none group-hover:text-gold" />
                                     </div>
                                 </div>
 
@@ -303,8 +315,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                         className="px-3 py-1.5 border border-gold/20 bg-gold/5 text-gold text-[9px] font-bold uppercase tracking-widest hover:bg-gold hover:text-emerald-deep transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="Auto-generate subtasks using AI"
                                     >
-                                        <SparklesIcon className={`w-3 h-3 ${isGeneratingSubtasks ? 'animate-spin' : ''}`} />
-                                        {isGeneratingSubtasks ? 'Divining...' : 'Break Down'}
+                                        <Sparkles className={`w-3 h-3 ${isGeneratingSubtasks ? 'animate-spin' : ''}`} />
+                                        {isGeneratingSubtasks ? 'Divining...' : 'Divine Breakdown'}
                                     </button>
                                 </div>
 
@@ -317,7 +329,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                                     className={`w-4 h-4 border flex-shrink-0 flex items-center justify-center transition-all ${st.isCompleted ? 'bg-gold border-gold' : 'border-gold-muted/50 group-hover:border-gold'
                                                         }`}
                                                 >
-                                                    {st.isCompleted && <CheckCircleIcon className="w-2.5 h-2.5 text-emerald-deep" />}
+                                                    {st.isCompleted && <CheckCircle className="w-2.5 h-2.5 text-emerald-deep" />}
                                                 </button>
                                                 <input
                                                     value={st.title}
@@ -334,7 +346,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                                         title="Add comment to subtask"
                                                     >
                                                         <div className="relative">
-                                                            <MessageSquareIcon className="w-3.5 h-3.5" />
+                                                            <MessageSquare className="w-3.5 h-3.5" />
                                                             {st.comments?.length > 0 && (
                                                                 <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-crimson rounded-full" />
                                                             )}
@@ -347,7 +359,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                                         }}
                                                         className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-crimson transition-all"
                                                     >
-                                                        <CloseIcon className="w-3.5 h-3.5" />
+                                                        <X className="w-3.5 h-3.5" />
                                                     </button>
                                                 </div>
                                             </div>
@@ -389,7 +401,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                         }}
                                         className="text-[10px] font-bold text-gold-muted hover:text-gold mt-4 uppercase tracking-widest flex items-center gap-2 transition-colors"
                                     >
-                                        <div className="border border-current rounded-full p-0.5"><PlusIcon className="w-2.5 h-2.5" /></div>
+                                        <div className="border border-current rounded-full p-0.5"><Plus className="w-2.5 h-2.5" /></div>
                                         Add Check Item
                                     </button>
                                 </div>
@@ -419,14 +431,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                                 </div>
                                                 {/* User Icon */}
                                                 <div className="w-8 h-8 rounded-full border border-gold/30 bg-emerald-deep flex items-center justify-center flex-shrink-0 mt-1 shadow-glow-gold">
-                                                    <UserIcon className="w-4 h-4 text-gold" />
+                                                    <User className="w-4 h-4 text-gold" />
                                                 </div>
                                             </div>
                                         ) : (
                                             <div className="flex items-start gap-3 max-w-[85%]">
                                                 {/* AI Icon */}
                                                 <div className="w-8 h-8 rounded-full border border-emerald-light bg-emerald-dark flex items-center justify-center flex-shrink-0 mt-1">
-                                                    <BrainIcon className="w-4 h-4 text-emerald-400" />
+                                                    <Brain className="w-4 h-4 text-emerald-400" />
                                                 </div>
                                                 {/* AI Bubble */}
                                                 <div className="bg-emerald-light/20 border border-white/5 text-ivory/90 p-4 text-sm font-sans leading-relaxed rounded-tr-xl rounded-br-xl rounded-bl-xl">
@@ -441,7 +453,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                     <div className="flex w-full justify-start animate-pulse">
                                         <div className="flex items-start gap-3">
                                             <div className="w-8 h-8 rounded-full border border-emerald-light bg-emerald-dark flex items-center justify-center flex-shrink-0 mt-1">
-                                                <BrainIcon className="w-4 h-4 text-emerald-400" />
+                                                <Brain className="w-4 h-4 text-emerald-400" />
                                             </div>
                                             <div className="bg-emerald-light/10 border border-white/5 p-4 rounded-xl">
                                                 <div className="flex gap-1.5">
@@ -472,7 +484,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                                         disabled={!commentInput.trim() || isProcessingAI}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gold-muted hover:text-gold disabled:opacity-30 transition-colors"
                                     >
-                                        <SendIcon className="w-5 h-5" />
+                                        <Send className="w-5 h-5" />
                                     </button>
                                 </form>
                             </div>
@@ -480,7 +492,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

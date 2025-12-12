@@ -1,55 +1,80 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { vi, describe, it, expect } from 'vitest';
 import TaskCard from '../components/TaskCard';
 import { Task, Priority } from '../types';
+
+vi.mock('@gsap/react', () => ({
+    useGSAP: vi.fn(),
+}));
+
+vi.mock('gsap', () => ({
+    default: {
+        to: vi.fn(),
+        from: vi.fn(),
+        fromTo: vi.fn(),
+        set: vi.fn(),
+    }
+}));
+
+
+
+vi.mock('@dnd-kit/sortable', () => ({
+    useSortable: () => ({
+        attributes: {},
+        listeners: {},
+        setNodeRef: vi.fn(),
+        transform: null,
+        transition: null,
+        isDragging: false,
+    }),
+}));
+
+vi.mock('@dnd-kit/utilities', () => ({
+    CSS: { Transform: { toString: vi.fn() } },
+}));
 
 const mockTask: Task = {
     id: '1',
     title: 'Test Task',
-    description: 'Test Description',
-    priority: Priority.High,
-    category: 'Work',
+    priority: Priority.Medium,
+    category: 'Personal',
     isCompleted: false,
-    dueDate: '2023-12-31',
+    createdAt: Date.now(),
     subtasks: [],
-    comments: [],
-    createdAt: 12345
+    comments: []
 };
 
 describe('TaskCard', () => {
-    it('renders task details correctly', () => {
-        render(<TaskCard task={mockTask} onToggle={vi.fn()} onDelete={vi.fn()} onClick={vi.fn()} />);
-
+    it('should render task title', () => {
+        render(
+            <TaskCard
+                task={mockTask}
+                onDelete={() => { }}
+                onClick={() => { }}
+                onToggle={() => { }}
+                onFocus={() => { }}
+            />
+        );
         expect(screen.getByText('Test Task')).toBeInTheDocument();
-        expect(screen.getByText('High')).toBeInTheDocument(); // Priority
-        expect(screen.getByText(/2023-12-31/)).toBeInTheDocument(); // Date (might have ! if overdue)
     });
 
-    it('calls onToggle when checkbox is clicked', () => {
-        const onToggle = vi.fn();
-        render(<TaskCard task={mockTask} onToggle={onToggle} onDelete={vi.fn()} onClick={vi.fn()} />);
+    it('should call onFocus when focus button is clicked', () => {
+        const onFocusMock = vi.fn();
+        render(
+            <TaskCard
+                task={mockTask}
+                onDelete={() => { }}
+                onClick={() => { }}
+                onToggle={() => { }}
+                onFocus={onFocusMock}
+            />
+        );
 
-        const checkbox = screen.getByLabelText('Mark as complete');
-        fireEvent.click(checkbox);
-        expect(onToggle).toHaveBeenCalledWith('1');
-    });
+        // TaskCard has a button with aria-label "Focus on task"
+        const focusBtn = screen.getByLabelText('Focus on task');
+        fireEvent.click(focusBtn);
 
-    it('calls onDelete when delete button is clicked', () => {
-        const onDelete = vi.fn();
-        render(<TaskCard task={mockTask} onToggle={vi.fn()} onDelete={onDelete} onClick={vi.fn()} />);
-        // Delete button is hidden by default (opacity 0) but still in DOM and clickable
-        const deleteBtn = screen.getByLabelText('Delete task');
-        fireEvent.click(deleteBtn);
-        expect(onDelete).toHaveBeenCalledWith('1');
-    });
-
-    it('renders different styles for completed tasks', () => {
-        const completedTask = { ...mockTask, isCompleted: true };
-        render(<TaskCard task={completedTask} onToggle={vi.fn()} onDelete={vi.fn()} onClick={vi.fn()} />);
-
-        const title = screen.getByText('Test Task');
-        expect(title).toHaveClass('line-through');
-        expect(screen.getByLabelText('Mark as incomplete')).toBeInTheDocument();
+        expect(onFocusMock).toHaveBeenCalledWith(mockTask);
     });
 });

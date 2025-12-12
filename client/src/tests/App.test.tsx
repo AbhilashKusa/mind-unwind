@@ -25,6 +25,31 @@ vi.mock('../services/auth', () => ({
     }
 }));
 
+// Mock GSAP
+vi.mock('@gsap/react', () => ({
+    useGSAP: vi.fn(),
+}));
+
+vi.mock('gsap', () => ({
+    default: {
+        to: vi.fn(),
+        from: vi.fn(),
+        fromTo: vi.fn(),
+        set: vi.fn(),
+        timeline: vi.fn().mockReturnValue({
+            to: vi.fn(),
+            from: vi.fn(),
+        })
+    }
+}));
+
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+    observe() { }
+    unobserve() { }
+    disconnect() { }
+};
+
 
 describe('App', () => {
     it('renders the loading state initially or main app', async () => {
@@ -38,7 +63,7 @@ describe('App', () => {
         // "MindUnwind" text is in the header.
 
         // We can wait for the header to appear which signifies loaded.
-        const titleElement = await screen.findByText(/MindUnwind/i);
+        const titleElement = await screen.findByText(/Your Tasks/i);
         expect(titleElement).toBeInTheDocument();
     });
 });

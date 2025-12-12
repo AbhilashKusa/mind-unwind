@@ -36,32 +36,123 @@ router.get('/', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
     const t = req.body;
     const userId = req.user.id;
+
     try {
-        const query = `
-      INSERT INTO tasks (id, title, description, priority, category, is_completed, due_date, subtasks, comments, created_at, user_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8::jsonb, $9::jsonb, $10, $11)
-      ON CONFLICT (id) DO UPDATE SET
-        title = EXCLUDED.title,
-        description = EXCLUDED.description,
-        priority = EXCLUDED.priority,
-        category = EXCLUDED.category,
-        is_completed = EXCLUDED.is_completed,
-        due_date = EXCLUDED.due_date,
-        subtasks = EXCLUDED.subtasks,
-        comments = EXCLUDED.comments,
-        user_id = EXCLUDED.user_id 
-    `;
+        let query;
+        let values;
 
-        const values = [
-            t.id, t.title, t.description, t.priority, t.category, t.isCompleted,
-            t.dueDate || null, JSON.stringify(t.subtasks), JSON.stringify(t.comments), t.createdAt,
-            userId
-        ];
+        if (t.id) {
+            // Upsert with provided ID
+            query = `
+                INSERT INTO tasks (id, title, description, priority, category, is_completed, due_date, subtasks, comments, created_at, user_id)
+                VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8::jsonb, $9::jsonb, $10, $11)
+                ON CONFLICT (id) DO UPDATE SET
+                    title = EXCLUDED.title,
+                    description = EXCLUDED.description,
+                    priority = EXCLUDED.priority,
+                    category = EXCLUDED.category,
+                    is_completed = EXCLUDED.is_completed,
+                    due_date = EXCLUDED.due_date,
+                    subtasks = EXCLUDED.subtasks,
+                    comments = EXCLUDED.comments,
+                    user_id = EXCLUDED.user_id
+                RETURNING *
+            `;
+            values = [
+                t.id, t.title, t.description, t.priority, t.category, t.isCompleted || false,
+                t.dueDate || null, JSON.stringify(t.subtasks || []), JSON.stringify(t.comments || []), t.createdAt || Date.now(),
+                userId
+            ];
+        } else {
+            // Create new with auto-generated ID
+            query = `
+                INSERT INTO tasks (title, description, priority, category, is_completed, due_date, subtasks, comments, created_at, user_id)
+                VALUES ($1, $2, $3, $4, $5, $6::date, $7::jsonb, $8::jsonb, $9, $10)
+                RETURNING *
+            `;
+            values = [
+                t.title, t.description, t.priority, t.category, t.isCompleted || false,
+                t.dueDate || null, JSON.stringify(t.subtasks || []), JSON.stringify(t.comments || []), t.createdAt || Date.now(),
+                userId
+            ];
+        }
 
-        await pool.query(query, values);
-        res.json({ success: true });
+        const result = await pool.query(query, values);
+        const row = result.rows[0];
+
+        // Format response to match GET structure
+        const task = {
+            id: row.id,
+            title: row.title,
+            description: row.description,
+            priority: row.priority,
+            category: row.category,
+            isCompleted: row.is_completed,
+            dueDate: row.due_date,
+            subtasks: row.subtasks || [],
+            comments: row.comments || [],
+            createdAt: parseInt(row.created_at)
+        };
+
+        res.status(201).json(task);
     } catch (err) {
         console.error("Task Save Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const t = req.body;
+    const userId = req.user.id;
+
+    try {
+        const query = `
+            UPDATE tasks 
+            SET 
+                title = COALESCE($1, title),
+                description = COALESCE($2, description),
+                priority = COALESCE($3, priority),
+                category = COALESCE($4, category),
+                is_completed = COALESCE($5, is_completed),
+                due_date = COALESCE($6, due_date),
+                subtasks = COALESCE($7::jsonb, subtasks),
+                comments = COALESCE($8::jsonb, comments)
+            WHERE id = $9 AND user_id = $10
+            RETURNING *;
+        `;
+
+        const values = [
+            t.title, t.description, t.priority, t.category, t.isCompleted,
+            t.dueDate,
+            t.subtasks ? JSON.stringify(t.subtasks) : null,
+            t.comments ? JSON.stringify(t.comments) : null,
+            id, userId
+        ];
+
+        const result = await pool.query(query, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+
+        const row = result.rows[0];
+        const task = {
+            id: row.id,
+            title: row.title,
+            description: row.description,
+            priority: row.priority,
+            category: row.category,
+            isCompleted: row.is_completed,
+            dueDate: row.due_date,
+            subtasks: row.subtasks || [],
+            comments: row.comments || [],
+            createdAt: parseInt(row.created_at)
+        };
+
+        res.json(task);
+    } catch (err) {
+        console.error("Task Update Error:", err.message);
         res.status(500).json({ error: err.message });
     }
 });

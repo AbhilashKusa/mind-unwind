@@ -50,12 +50,13 @@ export const api = {
     },
 
     updateTask: async (task: Task): Promise<void> => {
-        const res = await fetch(`${API_URL}/tasks`, {
-            method: 'POST',
+        const res = await fetch(`${API_URL}/tasks/${task.id}`, {
+            method: 'PUT',
             headers: getHeaders(),
             body: JSON.stringify(task),
         });
         handleAuthError(res);
+        if (!res.ok) throw new Error('Failed to update task');
     },
 
     deleteTask: async (id: string): Promise<void> => {

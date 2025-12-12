@@ -8,6 +8,8 @@ vi.mock('../services/gemini', () => ({
     updateTaskWithAI: vi.fn(),
     brainstormIdeas: vi.fn(),
     optimizeSchedule: vi.fn(),
+    isAIAvailable: vi.fn().mockReturnValue(true),
+    getAIError: vi.fn().mockReturnValue(null),
 }));
 
 describe('Gemini Service Mock Integration', () => {

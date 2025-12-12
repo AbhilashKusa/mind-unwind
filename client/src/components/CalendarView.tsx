@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Task, Priority } from '../types';
-import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from './Icons';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 
 interface CalendarViewProps {
     tasks: Task[];
@@ -78,10 +78,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ tasks, onTaskClick, onDateS
                 </h2>
                 <div className="flex gap-2">
                     <button onClick={prevMonth} className="p-2 border border-gold-muted/30 text-gold-muted hover:text-gold hover:border-gold transition-colors rounded-sm">
-                        <ChevronLeftIcon className="w-5 h-5" />
+                        <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button onClick={nextMonth} className="p-2 border border-gold-muted/30 text-gold-muted hover:text-gold hover:border-gold transition-colors rounded-sm">
-                        <ChevronRightIcon className="w-5 h-5" />
+                        <ChevronRight className="w-5 h-5" />
                     </button>
                 </div>
             </div>
@@ -121,7 +121,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ tasks, onTaskClick, onDateS
                                 </span>
                                 {/* Hover Add Button */}
                                 <button className="opacity-0 group-hover:opacity-100 p-1 text-gold-muted hover:text-gold transition-opacity">
-                                    <PlusIcon className="w-3 h-3" />
+                                    <Plus className="w-3 h-3" />
                                 </button>
                             </div>
 

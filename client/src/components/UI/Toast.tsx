@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { SparklesIcon } from '../Icons';
+import { Sparkles } from 'lucide-react';
 
 export interface ToastMessage {
     id: string;
@@ -55,7 +55,7 @@ const ToastItem: React.FC<{ toast: ToastMessage, onRemove: (id: string) => void 
             className={`pointer-events-auto min-w-[300px] p-4 rounded-md border ${borderColor} ${bgColor} backdrop-blur-md shadow-glow-sm flex items-center gap-4`}
         >
             <div className={`p-2 rounded-full ${toast.type === 'error' ? 'bg-crimson/20' : 'bg-gold/20'}`}>
-                <SparklesIcon className={`w-4 h-4 ${toast.type === 'error' ? 'text-crimson' : 'text-gold'}`} />
+                <Sparkles className={`w-4 h-4 ${toast.type === 'error' ? 'text-crimson' : 'text-gold'}`} />
             </div>
             <div>
                 <h4 className={`font-serif text-sm font-bold ${toast.type === 'error' ? 'text-crimson' : 'text-gold'}`}>

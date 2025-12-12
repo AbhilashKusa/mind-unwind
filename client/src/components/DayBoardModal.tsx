@@ -1,7 +1,7 @@
 import React from 'react';
 import { Task } from '../types';
 import { BoardView } from './BoardView';
-import { CloseIcon, CalendarIcon } from './Icons';
+import { X, Calendar } from 'lucide-react';
 
 
 interface DayBoardModalProps {
@@ -31,7 +31,7 @@ export const DayBoardModal: React.FC<DayBoardModalProps> = ({ date, tasks, isOpe
                 <div className="flex justify-between items-center p-6 border-b border-gold-muted/10 bg-emerald-deep relative z-10">
                     <div className="flex items-center gap-4">
                         <div className="p-2 border border-gold/30 rounded-full text-gold bg-emerald-light/30">
-                            <CalendarIcon className="w-5 h-5" />
+                            <Calendar className="w-5 h-5" />
                         </div>
                         <div>
                             <h2 className="text-2xl font-serif text-ivory tracking-tight">Royal Agenda</h2>
@@ -39,7 +39,7 @@ export const DayBoardModal: React.FC<DayBoardModalProps> = ({ date, tasks, isOpe
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 text-gold-muted hover:text-gold transition-colors hover:bg-emerald-light/20 rounded-full">
-                        <CloseIcon className="w-6 h-6" />
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
 

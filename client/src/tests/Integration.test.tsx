@@ -15,6 +15,31 @@ vi.mock('../services/api', () => ({
     }
 }));
 
+// Mock GSAP
+vi.mock('@gsap/react', () => ({
+    useGSAP: vi.fn(),
+}));
+
+vi.mock('gsap', () => ({
+    default: {
+        to: vi.fn(),
+        from: vi.fn(),
+        fromTo: vi.fn(),
+        set: vi.fn(),
+        timeline: vi.fn().mockReturnValue({
+            to: vi.fn(),
+            from: vi.fn(),
+        })
+    }
+}));
+
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+    observe() { }
+    unobserve() { }
+    disconnect() { }
+};
+
 vi.mock('../services/auth', () => ({
     AuthService: {
         getMe: vi.fn().mockResolvedValue({ name: 'Test User' }),
@@ -31,14 +56,14 @@ describe('Integration: Add Task', () => {
         render(<App />);
 
         // Wait for app to load
-        await screen.findByText(/MindUnwind/i);
+        await screen.findByText(/Your Tasks/i);
 
         // Find Quick Add button (PlusIcon)
-        let quickAddBtn = screen.getByTitle('Quick Add Task');
+        let quickAddBtn = screen.getByTitle('Create New Task');
         fireEvent.click(quickAddBtn);
 
         // Expect Modal/Form
-        expect(screen.getByText('New Task')).toBeInTheDocument();
+        expect(await screen.findByText('Inscribe Task')).toBeInTheDocument();
 
         // Fill input
         // Updated placeholder to match Sabyasachi design

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -42,42 +42,55 @@
 :root {
     color-scheme: dark;
 
-    /* Default Fonts */
+    /* Default Fonts - Playfair for Elegance */
     --f-heading: "Playfair Display", serif;
     --f-body: "Lato", sans-serif;
 
-    /* ROYAL THEME (Default - Sabyasachi) */
-    --c-bg: #050807;
-    --c-bg-deep: #0a110e;
-    --c-bg-light: #1a2e26;
+    /* ROYAL (Default - Emerald & Gold) */
+    --c-bg: #022c22;
+    /* Emerald 950 - Deep Green */
+    --c-bg-deep: #064e3b;
+    /* Emerald 900 */
+    --c-bg-light: #065f46;
+    /* Emerald 800 */
 
     --c-primary: #d4af37;
+    /* Gold */
     --c-primary-light: #e6c566;
     --c-primary-muted: #a39874;
 
-    --c-text: #f2f0e4;
-    --c-text-dim: #d1d1c7;
+    --c-text: #ecfdf5;
+    /* Emerald 50 */
+    --c-text-dim: #a7f3d0;
+    /* Emerald 200 */
 
-    --c-error: #781825;
-    --c-error-bg: #2c0f16;
-    --c-warn: #c25e00;
+    --c-error: #7f1d1d;
+    --c-error-bg: #450a0a;
+    --c-warn: #c2410c;
 }
 
 [data-theme="serenity"] {
     color-scheme: light;
-    /* Light Blue/White Theme */
-    --c-bg: #f0f9ff;
-    --c-bg-deep: #ffffff;
-    --c-bg-light: #e0f2fe;
+    /* Serenity - Sky Blue & White */
+    --f-heading: "Lato", sans-serif;
+    --f-body: "Lato", sans-serif;
 
-    --c-primary: #0284c7;
-    /* Sky 600 */
+    --c-bg: #f0f9ff;
+    /* Sky 50 */
+    --c-bg-deep: #ffffff;
+    /* Pure White */
+    --c-bg-light: #e0f2fe;
+    /* Sky 100 */
+
+    --c-primary: #0ea5e9;
+    /* Sky 500 */
     --c-primary-light: #38bdf8;
     --c-primary-muted: #94a3b8;
 
-    --c-text: #0f172a;
-    /* Slate 900 */
-    --c-text-dim: #475569;
+    --c-text: #0c4a6e;
+    /* Sky 900 */
+    --c-text-dim: #0369a1;
+    /* Sky 700 */
 
     --c-error: #ef4444;
     --c-error-bg: #fef2f2;
@@ -86,8 +99,7 @@
 
 [data-theme="minimal"] {
     color-scheme: light;
-
-    /* SWISS MODERN (Poppins) */
+    /* SWISS MODERN */
     --f-heading: "Poppins", sans-serif;
     --f-body: "Poppins", sans-serif;
 
@@ -110,30 +122,24 @@
 
 [data-theme="midnight"] {
     color-scheme: dark;
-
-    /* MODERN DARK (Poppins) */
-    /* Neutral, Zinc-based dark mode */
-
+    /* NEUTRAL DARK - The "Basic" Dark Mode */
     --f-heading: "Poppins", sans-serif;
     --f-body: "Poppins", sans-serif;
 
-    --c-bg: #09090b;
-    /* Zinc 950 */
-    --c-bg-deep: #000000;
-    /* Pure Black */
-    --c-bg-light: #18181b;
+    --c-bg: #18181b;
     /* Zinc 900 */
+    --c-bg-deep: #09090b;
+    /* Zinc 950 */
+    --c-bg-light: #27272a;
+    /* Zinc 800 */
 
-    --c-primary: #ffffff;
-    /* Stark White Accents */
+    --c-primary: #a1a1aa;
+    /* Zinc 400 */
     --c-primary-light: #e4e4e7;
     --c-primary-muted: #52525b;
-    /* Zinc 600 */
 
     --c-text: #fafafa;
-    /* Zinc 50 */
     --c-text-dim: #a1a1aa;
-    /* Zinc 400 */
 
     --c-error: #f87171;
     --c-error-bg: #450a0a;
@@ -143,12 +149,19 @@
 
 [data-theme="earthen"] {
     color-scheme: dark;
-    /* Natural/Terracotta Theme */
-    --c-bg: #292524;
-    --c-bg-deep: #1c1917;
-    --c-bg-light: #44403c;
+    /* ESPRESSO / CLAY */
+    --f-heading: "Playfair Display", serif;
+    --f-body: "Lato", sans-serif;
+
+    --c-bg: #291d18;
+    /* Deep Espresso Brown */
+    --c-bg-deep: #1c120e;
+    /* Darker Coffee */
+    --c-bg-light: #443029;
+    /* Lighter Roast */
 
     --c-primary: #d6d3d1;
+    /* Stone 300 */
     --c-primary-light: #e7e5e4;
     --c-primary-muted: #78716c;
 
@@ -159,6 +172,222 @@
     --c-error-bg: #450a0a;
     --c-warn: #fb923c;
     --color-priority-low: #65a30d;
+}
+
+[data-theme="maharani"] {
+    color-scheme: dark;
+    /* INDIAN LUXURY - RICH PINK */
+    --f-heading: "Playfair Display", serif;
+    --f-body: "Lato", sans-serif;
+
+    --c-bg: #701a2e;
+    /* Rich Raspberry/Wine */
+    --c-bg-deep: #500724;
+    /* Deep Burgundy */
+    --c-bg-light: #831843;
+    /* Pink 900 */
+
+    --c-primary: #fbbf24;
+    /* Amber 400 (Gold) */
+    --c-primary-light: #fcd34d;
+    --c-primary-muted: #b45309;
+
+    --c-text: #fff1f2;
+    /* Rose 50 */
+    --c-text-dim: #fbcfe8;
+    /* Rose 200 */
+
+    --c-error: #be123c;
+    --c-error-bg: #881337;
+    --c-warn: #ea580c;
+    --color-priority-low: #059669;
+}
+
+[data-theme="luxe"] {
+    color-scheme: dark;
+    /* MODERN LUXE - GUNMETAL & GOLD */
+    --f-heading: "Playfair Display", serif;
+    --f-body: "Lato", sans-serif;
+
+    --c-bg: #1c1917;
+    /* Stone 900 - Warm Grey/Black */
+    --c-bg-deep: #0c0a09;
+    /* Stone 950 */
+    --c-bg-light: #292524;
+    /* Stone 800 */
+
+    --c-primary: #d4af37;
+    /* Gold */
+    --c-primary-light: #fae8b1;
+    --c-primary-muted: #483C32;
+
+    --c-text: #ffffff;
+    --c-text-dim: #a8a29e;
+    /* Stone 400 */
+
+    --c-error: #ef4444;
+    --c-error-bg: #450a0a;
+    --c-warn: #f59e0b;
+    --color-priority-low: #10b981;
+}
+
+[data-theme="spicy"] {
+    color-scheme: dark;
+    /* SPICY - DARK PAPRIKA */
+    --f-heading: "Poppins", sans-serif;
+    --f-body: "Poppins", sans-serif;
+
+    --c-bg: #4c0519;
+    /* Rose 950 - Deep Chilli */
+    --c-bg-deep: #380312;
+    /* Darker Chilli */
+    --c-bg-light: #881337;
+    /* Rose 900 */
+
+    --c-primary: #fdba74;
+    /* Orange 300 */
+    --c-primary-light: #ffedd5;
+    --c-primary-muted: #9a3412;
+
+    --c-text: #fff7ed;
+    --c-text-dim: #fed7aa;
+
+    --c-error: #ef4444;
+    --c-error-bg: #450a0a;
+    --c-warn: #f59e0b;
+    --color-priority-low: #84cc16;
+}
+
+[data-theme="couture"] {
+    color-scheme: dark;
+    /* COUTURE - MIDNIGHT NAVY */
+    --f-heading: "Poppins", sans-serif;
+    --f-body: "Poppins", sans-serif;
+
+    --c-bg: #020617;
+    /* Slate 950 - Deep Navy Black */
+    --c-bg-deep: #000000;
+    --c-bg-light: #1e293b;
+    /* Slate 800 */
+
+    --c-primary: #3b82f6;
+    /* Blue 500 - Electric Blue */
+    --c-primary-light: #60a5fa;
+    --c-primary-muted: #1e3a8a;
+
+    --c-text: #ffffff;
+    --c-text-dim: #94a3b8;
+
+    --c-error: #ef4444;
+    --c-error-bg: #450a0a;
+    --c-warn: #eab308;
+    --color-priority-low: #10b981;
+}
+
+[data-theme="frost"] {
+    color-scheme: light;
+    /* FROST - SILVER & GREY */
+    --f-heading: "Poppins", sans-serif;
+    --f-body: "Poppins", sans-serif;
+
+    --c-bg: #f8fafc;
+    /* Slate 50 - Silver White */
+    --c-bg-deep: #ffffff;
+    --c-bg-light: #e2e8f0;
+    /* Slate 200 */
+
+    --c-primary: #64748b;
+    /* Slate 500 - Dark Silver */
+    --c-primary-light: #94a3b8;
+    --c-primary-muted: #475569;
+
+    --c-text: #0f172a;
+    /* Slate 900 */
+    --c-text-dim: #64748b;
+
+    --c-error: #f43f5e;
+    --c-error-bg: #ffe4e6;
+    --c-warn: #f59e0b;
+    --color-priority-low: #10b981;
+}
+
+[data-theme="rouge"] {
+    color-scheme: dark;
+    /* ROUGE - MERLOT & WINE */
+    --f-heading: "Playfair Display", serif;
+    --f-body: "Lato", sans-serif;
+
+    --c-bg: #2b0202;
+    /* Deepest Red/Black */
+    --c-bg-deep: #000000;
+    --c-bg-light: #450a0a;
+    /* Red 950 */
+
+    --c-primary: #ef4444;
+    /* Red 500 - Lipstick */
+    --c-primary-light: #f87171;
+    --c-primary-muted: #991b1b;
+
+    --c-text: #ffe4e6;
+    --c-text-dim: #fda4af;
+
+    --c-error: #ef4444;
+    --c-error-bg: #450a0a;
+    --c-warn: #f59e0b;
+    --color-priority-low: #22c55e;
+}
+
+[data-theme="velvet"] {
+    color-scheme: dark;
+    /* VELVET - PLUM & AMETHYST */
+    --f-heading: "Playfair Display", serif;
+    --f-body: "Lato", sans-serif;
+
+    --c-bg: #2e1065;
+    /* Violet 950 - Deep Plum */
+    --c-bg-deep: #1e0538;
+    /* Darker Violet */
+    --c-bg-light: #4c1d95;
+    /* Violet 900 */
+
+    --c-primary: #d8b4fe;
+    /* Violet 300 - Lilac */
+    --c-primary-light: #e9d5ff;
+    --c-primary-muted: #7e22ce;
+
+    --c-text: #f3e8ff;
+    --c-text-dim: #d8b4fe;
+
+    --c-error: #be123c;
+    --c-error-bg: #4c0519;
+    --c-warn: #d97706;
+    --color-priority-low: #4ade80;
+}
+
+[data-theme="onyx"] {
+    color-scheme: dark;
+    /* ONYX - TRUE PITCH BLACK */
+    --f-heading: "Poppins", sans-serif;
+    --f-body: "Poppins", sans-serif;
+
+    --c-bg: #000000;
+    /* Pure Black */
+    --c-bg-deep: #000000;
+    --c-bg-light: #000000;
+    /* Still Black (Glossy effect comes from cards) */
+
+    --c-primary: #ffffff;
+    /* Pure White */
+    --c-primary-light: #e4e4e7;
+    --c-primary-muted: #71717a;
+
+    --c-text: #ffffff;
+    --c-text-dim: #a1a1aa;
+
+    --c-error: #ef4444;
+    --c-error-bg: #450a0a;
+    --c-warn: #f59e0b;
+    --color-priority-low: #10b981;
 }
 
 body {

@@ -16,7 +16,7 @@ const handleCacheError = async (error: ErrorEvent) => {
       const registrations = await navigator.serviceWorker.getRegistrations();
       for (const registration of registrations) {
         await registration.unregister();
-        console.log('Service Worker unregistered:', registration.scope);
+
       }
     }
 
@@ -25,11 +25,11 @@ const handleCacheError = async (error: ErrorEvent) => {
       const cacheNames = await caches.keys();
       for (const cacheName of cacheNames) {
         await caches.delete(cacheName);
-        console.log('Cache deleted:', cacheName);
+
       }
     }
 
-    console.log('Cache cleared. Reloading page...');
+
     // Prevent infinite reload loop by checking a flag
     if (!sessionStorage.getItem('cache_cleared')) {
       sessionStorage.setItem('cache_cleared', 'true');

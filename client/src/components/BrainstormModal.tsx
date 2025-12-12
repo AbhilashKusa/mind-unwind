@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GeneratedTaskData, Priority } from '../types';
 import { brainstormIdeas } from '../services/gemini';
-import { CloseIcon, LightbulbIcon, SparklesIcon, CheckCircleIcon, PlusIcon } from './Icons';
+import { X, Lightbulb, Sparkles, CheckCircle, Plus } from 'lucide-react';
 
 interface BrainstormModalProps {
     isOpen: boolean;
@@ -75,7 +75,7 @@ const BrainstormModal: React.FC<BrainstormModalProps> = ({ isOpen, onClose, onAd
                 <div className="flex items-center justify-between p-6 border-b border-gold-muted/10 bg-emerald-deep">
                     <div className="flex items-center gap-4">
                         <div className="bg-gold/10 border border-gold/30 p-2 text-gold">
-                            <LightbulbIcon className="w-5 h-5" />
+                            <Lightbulb className="w-5 h-5" />
                         </div>
                         <div>
                             <h2 className="text-2xl font-serif text-ivory leading-none">
@@ -87,7 +87,7 @@ const BrainstormModal: React.FC<BrainstormModalProps> = ({ isOpen, onClose, onAd
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 text-gold-muted hover:text-gold transition-colors">
-                        <CloseIcon className="w-6 h-6" />
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
 
@@ -124,7 +124,7 @@ const BrainstormModal: React.FC<BrainstormModalProps> = ({ isOpen, onClose, onAd
                                         </>
                                     ) : (
                                         <>
-                                            <SparklesIcon className="w-5 h-5 animate-pulse-slow" />
+                                            <Sparkles className="w-5 h-5 animate-pulse-slow" />
                                             Ignite Ideas
                                         </>
                                     )}
@@ -157,7 +157,7 @@ const BrainstormModal: React.FC<BrainstormModalProps> = ({ isOpen, onClose, onAd
                                         <div className={`w-5 h-5 rounded-full border mt-0.5 flex-shrink-0 flex items-center justify-center transition-colors
                                     ${selectedIndices.has(index) ? 'bg-gold border-gold text-emerald-deep' : 'border-gold-muted/30 bg-transparent group-hover:border-gold/50'}
                                 `}>
-                                            {selectedIndices.has(index) && <CheckCircleIcon className="w-3.5 h-3.5" />}
+                                            {selectedIndices.has(index) && <CheckCircle className="w-3.5 h-3.5" />}
                                         </div>
                                         <div>
                                             <h4 className={`font-serif text-lg ${selectedIndices.has(index) ? 'text-gold' : 'text-ivory'}`}>{idea.title}</h4>
@@ -188,7 +188,7 @@ const BrainstormModal: React.FC<BrainstormModalProps> = ({ isOpen, onClose, onAd
                             disabled={selectedIndices.size === 0}
                             className="px-8 py-3 bg-gold text-emerald-deep font-bold border border-gold shadow-glow-sm hover:shadow-glow-gold hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:shadow-none disabled:transform-none uppercase tracking-widest text-xs flex items-center gap-2"
                         >
-                            <PlusIcon className="w-4 h-4" />
+                            <Plus className="w-4 h-4" />
                             Accept {selectedIndices.size} Tasks
                         </button>
                     </div>

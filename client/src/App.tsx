@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from './store/useStore';
 import { Priority, Task, GeneratedTaskData, ViewMode } from './types';
 import TaskCard from './components/TaskCard';
-import { SortIcon, PlusIcon, SparklesIcon } from './components/Icons';
+import { ArrowUpDown, Plus, Sparkles } from 'lucide-react';
 import { EmptyState } from './components/EmptyState';
 import LoginScreen from './components/LoginScreen';
 import TaskDetailModal from './components/TaskDetailModal';
@@ -13,6 +13,7 @@ import gsap from 'gsap';
 import Sidebar from './components/Layout/Sidebar';
 import Toast, { ToastMessage } from './components/UI/Toast';
 import { CommandCenter } from './components/Dashboard/CommandCenter';
+import { CommandSpotlight } from './components/CommandCenter/CommandSpotlight';
 import { optimizeSchedule } from './services/gemini';
 
 // Lazy Load heavy modals (Performance Optimization)
@@ -20,6 +21,7 @@ const BrainstormModal = React.lazy(() => import('./components/BrainstormModal'))
 const DayBoardModal = React.lazy(() => import('./components/DayBoardModal').then(module => ({ default: module.DayBoardModal })));
 const ProfileModal = React.lazy(() => import('./components/ProfileModal').then(module => ({ default: module.ProfileModal })));
 const ManualAddModal = React.lazy(() => import('./components/ManualAddModal').then(module => ({ default: module.ManualAddModal })));
+const FocusModeModal = React.lazy(() => import('./components/FocusModeModal'));
 
 type SortOption = 'newest' | 'priority' | 'dueDate';
 
@@ -45,6 +47,24 @@ const App: React.FC = () => {
     // Day Board Modal State
     const [selectedDayDate, setSelectedDayDate] = useState<string | null>(null);
     const [isDayBoardOpen, setIsDayBoardOpen] = useState(false);
+
+    // Focus Mode State
+    const [isFocusOpen, setIsFocusOpen] = useState(false);
+    const [focusActiveTask, setFocusActiveTask] = useState<Task | null>(null);
+
+    // Command Spotlight State
+    const [isCommandSpotlightOpen, setIsCommandSpotlightOpen] = useState(false);
+
+    useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                setIsCommandSpotlightOpen((open) => !open);
+            }
+        }
+        document.addEventListener('keydown', down);
+        return () => document.removeEventListener('keydown', down);
+    }, []);
 
     // Manual Add State
     const getTodayString = () => {
@@ -76,24 +96,30 @@ const App: React.FC = () => {
     }, [theme]);
 
     useGSAP(() => {
-        // Ambient background animation
-        gsap.to(".ambient-glow", {
-            scale: 1.2,
-            opacity: 0.6,
-            duration: 8,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut"
-        });
+        // Only run animations if elements exist (not on login page)
+        const ambientEl = document.querySelector(".ambient-glow");
+        const mainContentEl = document.querySelector(".main-content");
 
-        // Content entrance
-        gsap.from(".main-content", {
-            y: 20,
-            opacity: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            delay: 0.2
-        });
+        if (ambientEl) {
+            gsap.to(".ambient-glow", {
+                scale: 1.2,
+                opacity: 0.6,
+                duration: 8,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+        }
+
+        if (mainContentEl) {
+            gsap.from(".main-content", {
+                y: 20,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power3.out",
+                delay: 0.2
+            });
+        }
     });
 
     // Toast Helper
@@ -180,6 +206,18 @@ const App: React.FC = () => {
         showToast("Task Permanently Deleted (Banished).", "info");
     }
 
+    const handleOpenFocus = (task: Task) => {
+        setFocusActiveTask(task);
+        setIsFocusOpen(true);
+    };
+
+    const handleCompleteInFocus = async (task: Task) => {
+        if (!task.isCompleted) {
+            await toggleTask(task.id);
+            showToast("Task Vanquished in the Focus Chamber.");
+        }
+    };
+
     // Sorting
     const getSortedTasks = () => {
         let sorted = [...tasks];
@@ -262,7 +300,7 @@ const App: React.FC = () => {
                         {viewMode === 'list' && (
                             <div className="relative group z-20">
                                 <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gold-muted hover:text-gold transition-colors">
-                                    <SortIcon className="w-3 h-3" />
+                                    <ArrowUpDown className="w-3 h-3" />
                                     <span>{sortOption === 'dueDate' ? 'Due Date' : sortOption === 'newest' ? 'Newest' : 'Priority'}</span>
                                 </button>
                                 <div className="absolute right-0 top-full mt-2 w-40 bg-emerald-deep border border-gold/30 shadow-glow-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-1 rounded-sm">
@@ -286,7 +324,7 @@ const App: React.FC = () => {
                                 </div>
                                 <div className="p-6 border border-gold/20 rounded-md bg-emerald-light/20 backdrop-blur-sm">
                                     <h3 className="font-serif text-xl text-gold mb-4 flex items-center gap-2">
-                                        <SparklesIcon className="w-5 h-5" /> Automation
+                                        <Sparkles className="w-5 h-5" /> Automation
                                     </h3>
                                     <p className="text-sm text-ivory/70 mb-6">Allow the royal algorithm to optimize your task order for maximum tranquility.</p>
                                     <button
@@ -311,6 +349,7 @@ const App: React.FC = () => {
                                                 onToggle={handleToggleTask}
                                                 onDelete={handleDeleteTask}
                                                 onClick={() => { setSelectedTask(task); setIsTaskModalOpen(true); }}
+                                                onFocus={() => handleOpenFocus(task)}
                                             />
                                         ))}
                                     </div>
@@ -340,11 +379,12 @@ const App: React.FC = () => {
                 className="fixed bottom-24 right-6 lg:bottom-10 lg:right-10 w-14 h-14 bg-gradient-to-br from-gold to-gold-light rounded-full shadow-glow-gold text-emerald-deep flex items-center justify-center hover:scale-110 hover:rotate-90 transition-all duration-300 z-40 group"
                 title="Create New Task"
             >
-                <PlusIcon className="w-6 h-6" />
+                <Plus className="w-6 h-6" />
             </button>
 
             {/* Overlays */}
             <Toast toasts={toasts} removeToast={removeToast} />
+            <CommandSpotlight isOpen={isCommandSpotlightOpen} onClose={() => setIsCommandSpotlightOpen(false)} currentView={viewMode} />
 
             {selectedTask && (
                 <TaskDetailModal
@@ -352,6 +392,7 @@ const App: React.FC = () => {
                     isOpen={isTaskModalOpen}
                     onClose={() => setIsTaskModalOpen(false)}
                     onUpdate={async (t) => { await updateTask(t); setSelectedTask(t); showToast("Updates recorded."); }}
+                    onFocus={() => { setIsTaskModalOpen(false); handleOpenFocus(selectedTask); }}
                 />
             )}
 
@@ -385,6 +426,13 @@ const App: React.FC = () => {
                     setPriority={setManualPriority}
                     dueDate={manualDueDate}
                     setDueDate={setManualDueDate}
+                />
+
+                <FocusModeModal
+                    isOpen={isFocusOpen}
+                    onClose={() => setIsFocusOpen(false)}
+                    task={focusActiveTask}
+                    onComplete={handleCompleteInFocus}
                 />
             </React.Suspense>
         </div>

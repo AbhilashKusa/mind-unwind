@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { CloseIcon, UserIcon } from './Icons';
+import { X } from 'lucide-react';
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -59,7 +59,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
                     onClick={onClose}
                     className="absolute right-4 top-4 p-2 text-gold-muted hover:text-gold transition-colors z-20"
                 >
-                    <CloseIcon className="w-6 h-6" />
+                    <X className="w-6 h-6" />
                 </button>
 
                 <div className="flex flex-col items-center mb-10 relative z-10">

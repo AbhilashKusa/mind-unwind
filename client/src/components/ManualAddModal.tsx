@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { CloseIcon, CalendarIconSmall } from './Icons';
+import { X, Calendar } from 'lucide-react';
 import { Priority } from '../types';
 
 interface ManualAddModalProps {
@@ -41,7 +41,7 @@ export const ManualAddModal: React.FC<ManualAddModalProps> = ({
 
                 <div className="flex justify-between items-center mb-8">
                     <h3 className="text-2xl font-serif text-gold">Inscribe Task</h3>
-                    <button onClick={onClose} className="text-gold-muted hover:text-gold transition-colors"><CloseIcon className="w-6 h-6" /></button>
+                    <button onClick={onClose} className="text-gold-muted hover:text-gold transition-colors"><X className="w-6 h-6" /></button>
                 </div>
                 <form onSubmit={onAdd} className="space-y-6">
                     <div className="group">
@@ -88,7 +88,7 @@ export const ManualAddModal: React.FC<ManualAddModalProps> = ({
                                 onChange={(e) => setDueDate(e.target.value)}
                                 className="w-full bg-emerald-light/30 border-b border-gold-muted/30 p-4 text-sm font-sans text-ivory focus:border-gold outline-none uppercase tracking-wide"
                             />
-                            <CalendarIconSmall className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gold-muted pointer-events-none" />
+                            <Calendar className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gold-muted pointer-events-none" />
                         </div>
                     </div>
 

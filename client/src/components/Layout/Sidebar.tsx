@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ListIcon, CalendarIcon, BoardIcon, SparklesIcon, UserIcon, MagicIcon } from '../Icons';
+import { List, Kanban, Calendar, Sparkles, User, Palette } from 'lucide-react';
 import { ThemeType } from '../../types';
 
 type ViewMode = 'list' | 'board' | 'calendar' | 'concierge';
@@ -16,18 +16,26 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentTheme, onChangeVi
     const [showThemes, setShowThemes] = useState(false);
 
     const navItems = [
-        { id: 'list', label: 'Tasks', icon: ListIcon },
-        { id: 'board', label: 'Board', icon: BoardIcon },
-        { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
-        { id: 'concierge', label: 'Concierge', icon: SparklesIcon },
+        { id: 'list', label: 'Tasks', icon: List },
+        { id: 'board', label: 'Board', icon: Kanban },
+        { id: 'calendar', label: 'Calendar', icon: Calendar },
+        { id: 'concierge', label: 'Concierge', icon: Sparkles },
     ];
 
     const themes: { id: ThemeType, color: string, label: string }[] = [
-        { id: 'royal', color: '#d4af37', label: 'Royal' },
-        { id: 'serenity', color: '#38bdf8', label: 'Serenity' },
-        { id: 'minimal', color: '#ffffff', label: 'Minimal' },
-        { id: 'midnight', color: '#18181b', label: 'Midnight' },
-        { id: 'earthen', color: '#d6d3d1', label: 'Earthen' },
+        { id: 'royal', color: '#022c22', label: 'Royal' }, // Emerald
+        { id: 'serenity', color: '#38bdf8', label: 'Serenity' }, // Sky
+        { id: 'minimal', color: '#f4f4f5', label: 'Minimal' }, // White
+        { id: 'midnight', color: '#18181b', label: 'Midnight' }, // Zinc
+        { id: 'earthen', color: '#291d18', label: 'Earthen' }, // Espresso
+        { id: 'maharani', color: '#701a2e', label: 'Maharani' }, // Raspberry
+        { id: 'luxe', color: '#1c1917', label: 'Luxe' }, // Warm Stone
+        { id: 'spicy', color: '#4c0519', label: 'Spicy' }, // Chilli
+        { id: 'couture', color: '#020617', label: 'Couture' }, // Navy
+        { id: 'frost', color: '#94a3b8', label: 'Frost' }, // Silver
+        { id: 'rouge', color: '#2b0202', label: 'Rouge' }, // Merlot
+        { id: 'velvet', color: '#2e1065', label: 'Velvet' }, // Plum
+        { id: 'onyx', color: '#000000', label: 'Onyx' }, // True Black
     ];
 
     return (
@@ -75,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentTheme, onChangeVi
                         className={`p-2 transition-colors rounded-full hover:bg-white/5 ${showThemes ? 'text-gold' : 'text-gold-muted'}`}
                         title="Change Theme"
                     >
-                        <MagicIcon className="w-6 h-6" />
+                        <Palette className="w-6 h-6" />
                     </button>
 
                     {/* Theme Popover */}
@@ -102,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentTheme, onChangeVi
                     className="p-2 text-gold-muted hover:text-gold transition-colors rounded-full hover:bg-white/5"
                     title="Profile"
                 >
-                    <UserIcon className="w-6 h-6" />
+                    <User className="w-6 h-6" />
                 </button>
             </div>
         </aside>

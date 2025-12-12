@@ -2,13 +2,14 @@ import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { Task, Priority } from '../types';
-import { CheckCircleIcon, TrashIcon, SplitIcon, ChatIcon, CalendarIcon } from './Icons';
+import { CheckCircle, Trash2, GitCommitVertical, MessageSquare, Calendar, Focus } from 'lucide-react';
 
 interface TaskCardProps {
     task: Task;
     onToggle: (id: string) => void;
     onDelete: (id: string) => void;
     onClick: (task: Task) => void;
+    onFocus?: (task: Task) => void;
 }
 
 const getPriorityStyle = (priority: Priority) => {
@@ -24,7 +25,7 @@ const getPriorityStyle = (priority: Priority) => {
     }
 };
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick, onFocus }) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const checkRef = useRef<HTMLButtonElement>(null);
 
@@ -93,7 +94,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
                         }`}
                     aria-label={task.isCompleted ? "Mark as incomplete" : "Mark as complete"}
                 >
-                    {task.isCompleted && <CheckCircleIcon className="w-3.5 h-3.5" />}
+                    {task.isCompleted && <CheckCircle className="w-3.5 h-3.5" />}
                 </button>
 
                 {/* Content */}
@@ -125,22 +126,32 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
                         {task.dueDate && (
                             <div className={`flex items-center gap-1.5 ${task.isCompleted ? 'text-gold-muted' : isOverdue ? 'text-crimson animate-pulse' : 'text-gold'
                                 }`}>
-                                <CalendarIcon className="w-3.5 h-3.5" />
+                                <Calendar className="w-3.5 h-3.5" />
                                 <span>{task.dueDate} {isOverdue && '!'}</span>
                             </div>
                         )}
                         {hasSubtasks && (
                             <div className="flex items-center gap-1.5 hover:text-gold transition-colors">
-                                <SplitIcon className="w-3.5 h-3.5" />
+                                <GitCommitVertical className="w-3.5 h-3.5" />
                                 <span>{completedSubtasks}/{totalSubtasks} Subtasks</span>
                             </div>
                         )}
                         {task.comments?.length > 0 && (
                             <div className="flex items-center gap-1.5 hover:text-gold transition-colors">
-                                <ChatIcon className="w-3.5 h-3.5" />
+                                <MessageSquare className="w-3.5 h-3.5" />
                                 <span>{task.comments.length}</span>
                             </div>
                         )}
+                        {/* Focus Action - Subtle */}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onFocus && onFocus(task); }}
+                            className="flex items-center gap-1.5 hover:text-gold transition-colors z-20"
+                            title="Enter Focus Chamber"
+                            aria-label="Focus on task"
+                        >
+                            <Focus className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Focus</span>
+                        </button>
                     </div>
 
                     {/* Elegant Progress Bar */}
@@ -157,7 +168,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete, onClick }
                     className="opacity-0 group-hover:opacity-100 transition-all duration-300 p-2 text-gold-muted hover:text-crimson hover:bg-crimson/10 rounded-full absolute bottom-2 right-2"
                     aria-label="Delete task"
                 >
-                    <TrashIcon className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" />
                 </button>
             </div>
         </div>

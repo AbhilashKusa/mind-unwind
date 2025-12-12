@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '../../store/useStore';
-import { BrainIcon, CloudCheckIcon } from '../Icons';
+import { Brain, Cloud } from 'lucide-react';
 
 export const Header: React.FC = () => {
     const { user, tasks, logout } = useStore();
@@ -16,7 +16,7 @@ export const Header: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
                 <div className="flex items-center gap-4 group cursor-default">
                     <div className="bg-gold/10 p-2 rounded-full border border-gold/30 group-hover:border-gold/60 transition-colors">
-                        <BrainIcon className="w-6 h-6 text-gold" />
+                        <Brain className="w-6 h-6 text-gold" />
                     </div>
                     <h1 className="text-2xl font-serif font-medium tracking-tight text-gold hidden sm:block">
                         MindUnwind
@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
 
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/80">
-                        <CloudCheckIcon className="w-3.5 h-3.5" />
+                        <Cloud className="w-3.5 h-3.5" />
                         <span>Connected</span>
                     </div>
                     <div className="text-[10px] font-bold border border-gold-muted/30 px-4 py-1.5 bg-emerald-light/30 hidden sm:block rounded-full uppercase tracking-widest text-gold-muted shadow-sm backdrop-blur-sm">
