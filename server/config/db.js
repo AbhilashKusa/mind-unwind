@@ -1,12 +1,22 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+const isProduction = process.env.NODE_ENV === 'production';
+const connectionString = process.env.DATABASE_URL;
+
 const pool = new Pool({
-    user: process.env.DB_USER || 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    database: process.env.DB_NAME || 'mindUnwind',
-    password: process.env.DB_PASSWORD || 'root',
-    port: process.env.DB_PORT || 5432,
+    ...(connectionString
+        ? {
+            connectionString,
+            ssl: isProduction ? { rejectUnauthorized: false } : false,
+        }
+        : {
+            user: process.env.DB_USER || 'postgres',
+            host: process.env.DB_HOST || 'localhost',
+            database: process.env.DB_NAME || 'mindUnwind',
+            password: process.env.DB_PASSWORD || 'root',
+            port: process.env.DB_PORT || 5432,
+        }),
 });
 
 const initDb = async () => {
