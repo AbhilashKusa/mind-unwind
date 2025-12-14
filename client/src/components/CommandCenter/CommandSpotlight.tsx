@@ -102,7 +102,7 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
                 subtasks: [],
                 comments: [],
                 createdAt: Date.now(),
-                workspace: 'personal'
+                workspace: item.workspace || 'personal'
             };
             await addTask(newTask);
         }

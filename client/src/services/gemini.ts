@@ -181,6 +181,10 @@ Your goal is to manage the user's task list based on their natural language inpu
 - Infer priority from urgency words ("urgent", "ASAP", "whenever")
 - Infer category from context ("meeting" → Work, "buy groceries" → Shopping)
 - Parse dates: "tomorrow", "next Monday", "December 25th", "in 3 days"
+- AUTO-DETECT WORKSPACE from task content:
+  * "office" - Work-related: meetings, deadlines, team, clients, reports, email, presentations
+  * "personal" - Life: gym, groceries, doctor, family, cook, clean, home, health, shopping
+  * "startup" - Entrepreneurial: pitch, investor, MVP, funding, launch, product, business idea
 
 ### UPDATE Tasks (Fuzzy Matching)
 - Match tasks by partial title (e.g., "groceries" matches "Buy groceries")
@@ -260,9 +264,10 @@ export const processUserCommand = async (
                   description: { type: Type.STRING },
                   priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
                   category: { type: Type.STRING },
-                  dueDate: { type: Type.STRING, description: "YYYY-MM-DD format or null" }
+                  dueDate: { type: Type.STRING, description: "YYYY-MM-DD format or null" },
+                  workspace: { type: Type.STRING, enum: ["office", "personal", "startup"], description: "Auto-detected from task content" }
                 },
-                required: ["title", "priority", "category"]
+                required: ["title", "priority", "category", "workspace"]
               }
             },
             updated: {

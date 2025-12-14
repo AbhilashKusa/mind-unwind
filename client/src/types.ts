@@ -44,6 +44,7 @@ export interface GeneratedTaskData {
   priority: string;
   category: string;
   dueDate?: string;
+  workspace?: 'office' | 'personal' | 'startup';
 }
 
 // New types for the Smart Command Center
