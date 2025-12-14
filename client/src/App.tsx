@@ -88,7 +88,7 @@ const App: React.FC = () => {
         const root = document.documentElement;
         root.setAttribute('data-theme', theme);
         // Force re-render of styles dependent on body class if any
-        if (theme === 'serenity' || theme === 'minimal') {
+        if (theme === 'minimal') {
             root.classList.add('light-mode');
         } else {
             root.classList.remove('light-mode');
