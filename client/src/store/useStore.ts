@@ -41,7 +41,7 @@ export const useStore = create<StoreState>((set, get) => ({
     viewMode: 'list',
     isBrainstormOpen: false,
     isManualAddOpen: false,
-    theme: (localStorage.getItem('theme') as ThemeType) || 'royal', // Load from LS
+    theme: (localStorage.getItem('theme') as ThemeType) || 'onyx', // Load from LS
 
     token: localStorage.getItem('token'),
     authError: null,

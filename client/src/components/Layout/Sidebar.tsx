@@ -23,19 +23,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentTheme, onChangeVi
     ];
 
     const themes: { id: ThemeType, color: string, label: string }[] = [
-        { id: 'royal', color: '#022c22', label: 'Royal' }, // Emerald
-        { id: 'serenity', color: '#38bdf8', label: 'Serenity' }, // Sky
+        { id: 'onyx', color: '#000000', label: 'Onyx' }, // True Black (Default)
         { id: 'minimal', color: '#f4f4f5', label: 'Minimal' }, // White
-        { id: 'midnight', color: '#18181b', label: 'Midnight' }, // Zinc
-        { id: 'earthen', color: '#291d18', label: 'Earthen' }, // Espresso
-        { id: 'maharani', color: '#701a2e', label: 'Maharani' }, // Raspberry
-        { id: 'luxe', color: '#1c1917', label: 'Luxe' }, // Warm Stone
-        { id: 'spicy', color: '#4c0519', label: 'Spicy' }, // Chilli
-        { id: 'couture', color: '#020617', label: 'Couture' }, // Navy
-        { id: 'frost', color: '#94a3b8', label: 'Frost' }, // Silver
-        { id: 'rouge', color: '#2b0202', label: 'Rouge' }, // Merlot
-        { id: 'velvet', color: '#2e1065', label: 'Velvet' }, // Plum
-        { id: 'onyx', color: '#000000', label: 'Onyx' }, // True Black
     ];
 
     return (

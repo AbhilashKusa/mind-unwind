@@ -42,82 +42,81 @@
 :root {
     color-scheme: dark;
 
-    /* Default Fonts - Playfair for Elegance */
-    --f-heading: "Playfair Display", serif;
-    --f-body: "Lato", sans-serif;
+    /* Default Fonts - Poppins Always */
+    --f-heading: "Poppins", sans-serif;
+    --f-body: "Poppins", sans-serif;
 
-    /* ROYAL (Default - Emerald & Gold) */
-    --c-bg: #022c22;
-    /* Emerald 950 - Deep Green */
-    --c-bg-deep: #064e3b;
-    /* Emerald 900 */
-    --c-bg-light: #065f46;
-    /* Emerald 800 */
+    /* ONYX (Default - True Black & Gold) */
+    --c-bg: #000000;
+    /* Pure Black */
+    --c-bg-deep: #050505;
+    /* Almost Black */
+    --c-bg-light: #0a0a0a;
+    /* Dark Grey */
 
     --c-primary: #d4af37;
     /* Gold */
     --c-primary-light: #e6c566;
     --c-primary-muted: #a39874;
 
-    --c-text: #ecfdf5;
-    /* Emerald 50 */
-    --c-text-dim: #a7f3d0;
-    /* Emerald 200 */
-
-    --c-error: #7f1d1d;
-    --c-error-bg: #450a0a;
-    --c-warn: #c2410c;
-}
-
-[data-theme="serenity"] {
-    color-scheme: light;
-    /* Serenity - Sky Blue & White */
-    --f-heading: "Lato", sans-serif;
-    --f-body: "Lato", sans-serif;
-
-    --c-bg: #f0f9ff;
-    /* Sky 50 */
-    --c-bg-deep: #ffffff;
-    /* Pure White */
-    --c-bg-light: #e0f2fe;
-    /* Sky 100 */
-
-    --c-primary: #0ea5e9;
-    /* Sky 500 */
-    --c-primary-light: #38bdf8;
-    --c-primary-muted: #94a3b8;
-
-    --c-text: #0c4a6e;
-    /* Sky 900 */
-    --c-text-dim: #0369a1;
-    /* Sky 700 */
+    --c-text: #f5f5f5;
+    /* White Smoke */
+    --c-text-dim: #a3a3a3;
+    /* Grey 400 */
 
     --c-error: #ef4444;
-    --c-error-bg: #fef2f2;
+    --c-error-bg: #450a0a;
     --c-warn: #f59e0b;
 }
 
 [data-theme="minimal"] {
     color-scheme: light;
-    /* SWISS MODERN */
-    --f-heading: "Poppins", sans-serif;
-    --f-body: "Poppins", sans-serif;
+    /* Minimal - White & Black */
 
     --c-bg: #ffffff;
-    --c-bg-deep: #fafafa;
-    --c-bg-light: #f4f4f5;
+    --c-bg-deep: #f4f4f5;
+    /* Zinc 100 */
+    --c-bg-light: #e4e4e7;
+    /* Zinc 200 */
 
-    --c-primary: #000000;
-    --c-primary-light: #262626;
-    --c-primary-muted: #a1a1aa;
+    --c-primary: #18181b;
+    /* Zinc 900 */
+    --c-primary-light: #27272a;
+    --c-primary-muted: #71717a;
 
-    --c-text: #18181b;
+    --c-text: #09090b;
+    /* Zinc 950 */
     --c-text-dim: #52525b;
+    /* Zinc 600 */
 
-    --c-error: #ef4444;
-    --c-error-bg: #fff1f2;
-    --c-warn: #f59e0b;
-    --color-priority-low: #10b981;
+    --c-error: #dc2626;
+    --c-error-bg: #fef2f2;
+    --c-warn: #d97706;
+}
+
+/* DELETED THEMES REMOVED */
+color-scheme: light;
+/* SWISS MODERN */
+--f-heading: "Poppins",
+sans-serif;
+--f-body: "Poppins",
+sans-serif;
+
+--c-bg: #ffffff;
+--c-bg-deep: #fafafa;
+--c-bg-light: #f4f4f5;
+
+--c-primary: #000000;
+--c-primary-light: #262626;
+--c-primary-muted: #a1a1aa;
+
+--c-text: #18181b;
+--c-text-dim: #52525b;
+
+--c-error: #ef4444;
+--c-error-bg: #fff1f2;
+--c-warn: #f59e0b;
+--color-priority-low: #10b981;
 }
 
 [data-theme="midnight"] {
