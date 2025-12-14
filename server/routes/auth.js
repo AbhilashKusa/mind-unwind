@@ -48,6 +48,7 @@ router.post('/login', async (req, res) => {
         delete user.password_hash;
         res.json({ user, token });
     } catch (err) {
+        console.error("LOGIN ERROR:", err);
         res.status(500).json({ error: err.message });
     }
 });
