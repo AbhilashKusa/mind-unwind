@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { User } from 'lucide-react';
 
-import LoginBackground from './LoginBackground';
-
 interface LoginScreenProps {
   onLogin: (user: any) => void;
 }
@@ -37,8 +35,11 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* 3D Background */}
-      <LoginBackground />
+      {/* Background Ornaments */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20" style={{
+        backgroundImage: 'radial-gradient(circle at 50% 50%, #d4af37 1px, transparent 1px)',
+        backgroundSize: '40px 40px'
+      }}></div>
 
       <div className="text-center mb-10 relative z-10">
         <h1 className="text-5xl md:text-6xl font-serif font-medium tracking-tight mb-2 text-gold animate-in fade-in slide-in-from-bottom-4 duration-700">Mind Unwind</h1>

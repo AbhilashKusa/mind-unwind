@@ -57,7 +57,7 @@ export interface AICommandResponse {
 }
 
 export type ViewMode = 'list' | 'board' | 'calendar' | 'concierge';
-export type ThemeType = 'onyx' | 'light';
+export type ThemeType = 'onyx' | 'minimal';
 
 
 export interface AppState {

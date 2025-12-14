@@ -24,7 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentTheme, onChangeVi
 
     const themes: { id: ThemeType, color: string, label: string }[] = [
         { id: 'onyx', color: '#000000', label: 'Onyx' }, // True Black (Default)
-        { id: 'light', color: '#ffffff', label: 'Light Mode' }, // Morning Nature
+        { id: 'minimal', color: '#f4f4f5', label: 'Minimal' }, // White
     ];
 
     return (

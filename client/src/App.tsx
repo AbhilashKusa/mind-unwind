@@ -15,7 +15,7 @@ import Toast, { ToastMessage } from './components/UI/Toast';
 import { CommandCenter } from './components/Dashboard/CommandCenter';
 import { CommandSpotlight } from './components/CommandCenter/CommandSpotlight';
 import { optimizeSchedule } from './services/gemini';
-import NatureBackground from './components/NatureBackground';
+
 
 // Lazy Load heavy modals (Performance Optimization)
 const BrainstormModal = React.lazy(() => import('./components/BrainstormModal'));
@@ -89,7 +89,7 @@ const App: React.FC = () => {
         const root = document.documentElement;
         root.setAttribute('data-theme', theme);
         // Force re-render of styles dependent on body class if any
-        if (theme === 'light') {
+        if (theme === 'minimal') {
             root.classList.add('light-mode');
         } else {
             root.classList.remove('light-mode');
@@ -255,8 +255,8 @@ const App: React.FC = () => {
             className="min-h-screen text-ivory font-sans selection:bg-gold selection:text-emerald-deep overflow-hidden flex flex-col lg:flex-row transition-colors duration-500"
         >
 
-            {/* Nature Zen Background */}
-            <NatureBackground />
+            {/* Ambient background */}
+            <div className="ambient-glow fixed top-20 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gold/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
 
             <Sidebar
                 currentView={viewMode}
@@ -307,7 +307,7 @@ const App: React.FC = () => {
                                     <p className="font-serif text-lg leading-relaxed text-ivory/80">
                                         Command the essence of the schedule. The AI curator awaits your query.
                                     </p>
-                                    <CommandCenter onOpenBrainstorm={() => setBrainstormOpen(true)} />
+                                    <CommandCenter />
                                 </div>
                                 <div className="p-6 border border-gold/20 rounded-md bg-emerald-light/20 backdrop-blur-sm">
                                     <h3 className="font-serif text-xl text-gold mb-4 flex items-center gap-2">

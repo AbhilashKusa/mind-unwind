@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg'],
       manifest: {
         name: 'Mind Unwind',
         short_name: 'MindUnwind',
@@ -35,13 +35,12 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
-          'vendor-3d': ['three', '@react-three/fiber', '@react-three/drei'],
           'vendor-gsap': ['gsap', '@gsap/react'],
-          'vendor-ui': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', 'lucide-react']
+          'vendor-ui': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities']
         }
       }
     },
-    chunkSizeWarningLimit: 1600
+    chunkSizeWarningLimit: 1000
   },
   server: {
     proxy: {
