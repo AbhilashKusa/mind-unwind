@@ -244,10 +244,6 @@ const App: React.FC = () => {
 
     const sortedTasks = getSortedTasks();
 
-    // Force concierge for screenshot if needed, or just rely on click
-    useEffect(() => {
-        if (viewMode !== 'concierge') setViewMode('concierge');
-    }, []);
 
 
     return (
