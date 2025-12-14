@@ -69,6 +69,9 @@ const initDb = async () => {
         try { await client.query(`ALTER TABLE tasks ADD COLUMN subtasks JSONB DEFAULT '[]'::jsonb;`); } catch (e) { }
         try { await client.query(`ALTER TABLE tasks ADD COLUMN comments JSONB DEFAULT '[]'::jsonb;`); } catch (e) { }
 
+        // Workspace feature - add workspace column (office, personal, startup)
+        try { await client.query(`ALTER TABLE tasks ADD COLUMN workspace VARCHAR(50) DEFAULT 'personal';`); } catch (e) { }
+
         // Migrate ID column from INTEGER/SERIAL to TEXT if needed
         try {
             await client.query(`ALTER TABLE tasks ALTER COLUMN id TYPE TEXT;`);

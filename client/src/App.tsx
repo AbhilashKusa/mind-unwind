@@ -15,6 +15,7 @@ import Toast, { ToastMessage } from './components/UI/Toast';
 import { CommandCenter } from './components/Dashboard/CommandCenter';
 import { CommandSpotlight } from './components/CommandCenter/CommandSpotlight';
 import { optimizeSchedule } from './services/gemini';
+import { WorkspaceTabs } from './components/WorkspaceTabs';
 
 
 // Lazy Load heavy modals (Performance Optimization)
@@ -34,7 +35,8 @@ const App: React.FC = () => {
         isManualAddOpen, setManualAddOpen,
         toggleTask, deleteTask, updateTask, setTasks,
         isProfileOpen, setProfileOpen,
-        theme, setTheme
+        theme, setTheme,
+        currentWorkspace, setWorkspace
     } = useStore();
 
     // Local UI State
@@ -133,7 +135,8 @@ const App: React.FC = () => {
             dueDate: manualDueDate,
             subtasks: [],
             comments: [],
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            workspace: currentWorkspace
         };
 
         await addTask(newTask);
@@ -154,7 +157,8 @@ const App: React.FC = () => {
                 dueDate: t.dueDate || undefined,
                 subtasks: [],
                 comments: [],
-                createdAt: Date.now()
+                createdAt: Date.now(),
+                workspace: currentWorkspace
             };
             await addTask(newTask);
         }
@@ -264,6 +268,12 @@ const App: React.FC = () => {
 
             <main className="flex-1 h-screen overflow-y-auto relative scrollbar-thin">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 main-content">
+
+                    {/* Workspace Tabs */}
+                    <WorkspaceTabs
+                        currentWorkspace={currentWorkspace}
+                        onChangeWorkspace={setWorkspace}
+                    />
 
                     {/* Header: Dynamic Title based on View */}
                     <div className="flex justify-between items-end mb-8 border-b border-gold/10 pb-4">

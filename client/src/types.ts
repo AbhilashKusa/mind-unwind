@@ -35,6 +35,7 @@ export interface Task {
   subtasks: Subtask[];
   comments: Comment[];
   createdAt: number;
+  workspace: WorkspaceType;
 }
 
 export interface GeneratedTaskData {
@@ -58,6 +59,7 @@ export interface AICommandResponse {
 
 export type ViewMode = 'list' | 'board' | 'calendar' | 'concierge';
 export type ThemeType = 'onyx' | 'minimal';
+export type WorkspaceType = 'office' | 'personal' | 'startup';
 
 
 export interface AppState {

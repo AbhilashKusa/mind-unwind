@@ -9,7 +9,7 @@ router.get('/', authenticateToken, async (req, res) => {
       SELECT 
         id, title, description, priority, category, is_completed, 
         TO_CHAR(due_date, 'YYYY-MM-DD') as due_date, 
-        subtasks, comments, created_at 
+        subtasks, comments, created_at, workspace 
       FROM tasks 
       WHERE user_id = $1
       ORDER BY is_completed ASC, created_at DESC
@@ -25,7 +25,8 @@ router.get('/', authenticateToken, async (req, res) => {
             dueDate: row.due_date,
             subtasks: row.subtasks || [],
             comments: row.comments || [],
-            createdAt: parseInt(row.created_at)
+            createdAt: parseInt(row.created_at),
+            workspace: row.workspace || 'personal'
         }));
         res.json(tasks);
     } catch (err) {
@@ -44,8 +45,8 @@ router.post('/', authenticateToken, async (req, res) => {
         if (t.id) {
             // Upsert with provided ID
             query = `
-                INSERT INTO tasks (id, title, description, priority, category, is_completed, due_date, subtasks, comments, created_at, user_id)
-                VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8::jsonb, $9::jsonb, $10, $11)
+                INSERT INTO tasks (id, title, description, priority, category, is_completed, due_date, subtasks, comments, created_at, user_id, workspace)
+                VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8::jsonb, $9::jsonb, $10, $11, $12)
                 ON CONFLICT (id) DO UPDATE SET
                     title = EXCLUDED.title,
                     description = EXCLUDED.description,
@@ -55,25 +56,26 @@ router.post('/', authenticateToken, async (req, res) => {
                     due_date = EXCLUDED.due_date,
                     subtasks = EXCLUDED.subtasks,
                     comments = EXCLUDED.comments,
-                    user_id = EXCLUDED.user_id
+                    user_id = EXCLUDED.user_id,
+                    workspace = EXCLUDED.workspace
                 RETURNING *
             `;
             values = [
                 t.id, t.title, t.description, t.priority, t.category, t.isCompleted || false,
                 t.dueDate || null, JSON.stringify(t.subtasks || []), JSON.stringify(t.comments || []), t.createdAt || Date.now(),
-                userId
+                userId, t.workspace || 'personal'
             ];
         } else {
             // Create new with auto-generated ID
             query = `
-                INSERT INTO tasks (title, description, priority, category, is_completed, due_date, subtasks, comments, created_at, user_id)
-                VALUES ($1, $2, $3, $4, $5, $6::date, $7::jsonb, $8::jsonb, $9, $10)
+                INSERT INTO tasks (title, description, priority, category, is_completed, due_date, subtasks, comments, created_at, user_id, workspace)
+                VALUES ($1, $2, $3, $4, $5, $6::date, $7::jsonb, $8::jsonb, $9, $10, $11)
                 RETURNING *
             `;
             values = [
                 t.title, t.description, t.priority, t.category, t.isCompleted || false,
                 t.dueDate || null, JSON.stringify(t.subtasks || []), JSON.stringify(t.comments || []), t.createdAt || Date.now(),
-                userId
+                userId, t.workspace || 'personal'
             ];
         }
 
@@ -91,7 +93,8 @@ router.post('/', authenticateToken, async (req, res) => {
             dueDate: row.due_date,
             subtasks: row.subtasks || [],
             comments: row.comments || [],
-            createdAt: parseInt(row.created_at)
+            createdAt: parseInt(row.created_at),
+            workspace: row.workspace || 'personal'
         };
 
         res.status(201).json(task);
@@ -117,8 +120,9 @@ router.put('/:id', authenticateToken, async (req, res) => {
                 is_completed = COALESCE($5, is_completed),
                 due_date = COALESCE($6, due_date),
                 subtasks = COALESCE($7::jsonb, subtasks),
-                comments = COALESCE($8::jsonb, comments)
-            WHERE id = $9 AND user_id = $10
+                comments = COALESCE($8::jsonb, comments),
+                workspace = COALESCE($9, workspace)
+            WHERE id = $10 AND user_id = $11
             RETURNING *;
         `;
 
@@ -127,6 +131,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
             t.dueDate,
             t.subtasks ? JSON.stringify(t.subtasks) : null,
             t.comments ? JSON.stringify(t.comments) : null,
+            t.workspace || null,
             id, userId
         ];
 
@@ -147,7 +152,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
             dueDate: row.due_date,
             subtasks: row.subtasks || [],
             comments: row.comments || [],
-            createdAt: parseInt(row.created_at)
+            createdAt: parseInt(row.created_at),
+            workspace: row.workspace || 'personal'
         };
 
         res.json(task);

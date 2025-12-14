@@ -100,7 +100,8 @@ export const CommandCenter: React.FC = () => {
             dueDate: item.dueDate,
             subtasks: [],
             comments: [],
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            workspace: 'personal'
         }));
 
         for (const t of newTasks) {

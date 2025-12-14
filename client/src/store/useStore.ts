@@ -1,11 +1,14 @@
 import { create } from 'zustand';
-import { AppState, Task, User, ViewMode, ThemeType } from '../types';
+import { AppState, Task, User, ViewMode, ThemeType, WorkspaceType } from '../types';
 import { api } from '../services/api';
 import { AuthService } from '../services/auth';
 
 interface StoreState extends AppState {
     theme: ThemeType;
     setTheme: (theme: ThemeType) => void;
+
+    currentWorkspace: WorkspaceType;
+    setWorkspace: (workspace: WorkspaceType) => void;
 
     token: string | null;
     authError: string | null;
@@ -42,6 +45,7 @@ export const useStore = create<StoreState>((set, get) => ({
     isBrainstormOpen: false,
     isManualAddOpen: false,
     theme: (localStorage.getItem('theme') as ThemeType) || 'onyx', // Load from LS
+    currentWorkspace: (localStorage.getItem('workspace') as WorkspaceType) || 'personal',
 
     token: localStorage.getItem('token'),
     authError: null,
@@ -183,6 +187,10 @@ export const useStore = create<StoreState>((set, get) => ({
     setTheme: (theme) => {
         localStorage.setItem('theme', theme);
         set({ theme });
+    },
+    setWorkspace: (workspace) => {
+        localStorage.setItem('workspace', workspace);
+        set({ currentWorkspace: workspace });
     },
 
 
