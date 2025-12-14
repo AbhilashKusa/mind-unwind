@@ -237,10 +237,9 @@ const App: React.FC = () => {
 
 
 
-    // TEMPORARY VERIFICATION BYPASS
+    // Auth Check
     if (!isLoaded || !user) {
-        // return <LoginScreen onLogin={() => { }} />;
-        // Auto-login visual bypass
+        return <LoginScreen onLogin={() => { }} />;
     }
 
     const sortedTasks = getSortedTasks();
