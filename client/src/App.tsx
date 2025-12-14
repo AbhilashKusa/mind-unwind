@@ -212,7 +212,9 @@ const App: React.FC = () => {
 
     // Sorting
     const getSortedTasks = () => {
-        let sorted = [...tasks];
+        // Filter by current workspace first
+        const workspaceTasks = tasks.filter(t => (t.workspace || 'personal') === currentWorkspace);
+        let sorted = [...workspaceTasks];
         // Sort by completion first (incomplete on top)
         sorted.sort((a, b) => {
             if (a.isCompleted === b.isCompleted) return 0;
