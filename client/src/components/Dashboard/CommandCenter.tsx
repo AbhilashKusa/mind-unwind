@@ -1,12 +1,19 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
 import { processUserCommand, addToCommandHistory, generateProactiveSuggestions, ProactiveSuggestion, isAIAvailable, getAIError } from '../../services/gemini';
-import { Wand2, Sparkles, Trash2, Check, X, Lightbulb, RefreshCw } from 'lucide-react';
+import { Sparkles, Trash2, Check, Lightbulb, Zap, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Priority, Task, AICommandResponse } from '../../types';
+import { NeuralOrb } from './NeuralOrb';
 
 // Check AI availability on load
 const aiAvailable = isAIAvailable();
 const aiError = getAIError();
+
+interface CommandCenterProps {
+    onOpenBrainstorm?: () => void;
+}
+
 interface PendingAction {
     response: AICommandResponse;
     originalCommand: string;
@@ -17,7 +24,7 @@ interface UndoState {
     description: string;
 }
 
-export const CommandCenter: React.FC = () => {
+export const CommandCenter: React.FC<CommandCenterProps> = ({ onOpenBrainstorm }) => {
     const { tasks, setTasks, addTask, updateTask, deleteTask } = useStore();
     const [commandInput, setCommandInput] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -192,18 +199,12 @@ export const CommandCenter: React.FC = () => {
             const errorMessage = err.message || '';
 
             if (errorMessage.includes('VITE_GEMINI_API_KEY') || errorMessage.includes('not configured') || errorMessage.includes('API Key')) {
-                setError("AI not configured. Please set VITE_GEMINI_API_KEY in your .env file.");
-            } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError') || errorMessage.includes('ERR_CONNECTION')) {
-                setError("Connection issue. Please check your internet and try again.");
-            } else if (errorMessage.includes('timeout') || errorMessage.includes('TIMEOUT')) {
-                setError("Request timed out. Try a simpler command.");
-            } else if (errorMessage.includes('quota') || errorMessage.includes('429') || errorMessage.includes('rate limit')) {
-                setError("AI quota exceeded. Please wait a moment.");
-            } else if (errorMessage.includes('400') || errorMessage.includes('invalid')) {
-                setError("Invalid request. Please rephrase your command.");
+                setError("AI not configured. Check .env");
+            } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+                setError("Connection issue.");
             } else {
                 console.error("Command Center Error:", errorMessage);
-                setError("AI service unavailable. Please try again later.");
+                setError("AI service unavailable.");
             }
         } finally {
             setIsProcessing(false);
@@ -222,205 +223,158 @@ export const CommandCenter: React.FC = () => {
         setTimeout(() => setAiResponse(null), 3000);
     };
 
-    // Get suggestion type color
-    const getSuggestionColor = (type: ProactiveSuggestion['type']) => {
-        switch (type) {
-            case 'overdue': return 'border-crimson/60 text-crimson hover:border-crimson';
-            case 'deadline': return 'border-amber-500/60 text-amber-400 hover:border-amber-500';
-            case 'cleanup': return 'border-emerald-light/60 text-emerald-light hover:border-emerald-light';
-            case 'productivity': return 'border-gold/60 text-gold hover:border-gold';
-            case 'reminder': return 'border-ivory/30 text-ivory/80 hover:border-ivory/60';
-            default: return 'border-gold-muted/40 text-gold-muted hover:border-gold';
-        }
-    };
-
-    // Render confirmation preview
-    const renderConfirmation = () => {
-        if (!pendingAction) return null;
-
-        const { response } = pendingAction;
-
-        return (
-            <div className="mt-4 p-4 bg-emerald-deep/80 border border-gold/40 rounded-sm animate-in fade-in slide-in-from-top-2">
-                <h4 className="text-gold font-bold text-xs uppercase tracking-wider mb-3">
-                    ⚠️ Confirm Changes
-                </h4>
-                <div className="space-y-2 text-xs text-ivory/80 mb-4">
-                    {response.added.length > 0 && (
-                        <p className="flex items-center gap-2">
-                            <span className="text-emerald-light">+</span>
-                            Adding {response.added.length} task{response.added.length > 1 ? 's' : ''}
-                        </p>
-                    )}
-                    {response.updated.length > 0 && (
-                        <p className="flex items-center gap-2">
-                            <span className="text-gold">↻</span>
-                            Updating {response.updated.length} task{response.updated.length > 1 ? 's' : ''}
-                        </p>
-                    )}
-                    {response.deletedIds.length > 0 && (
-                        <p className="flex items-center gap-2 text-crimson">
-                            <Trash2 className="w-3 h-3" />
-                            Deleting {response.deletedIds.length} task{response.deletedIds.length > 1 ? 's' : ''}
-                        </p>
-                    )}
-                </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={handleConfirmAction}
-                        className="flex-1 py-2 px-4 bg-gradient-to-r from-gold-muted via-gold to-gold-muted text-emerald-deep font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:shadow-glow-gold transition-all"
-                    >
-                        <Check className="w-4 h-4" />
-                        Confirm
-                    </button>
-                    <button
-                        onClick={handleCancelAction}
-                        className="py-2 px-4 border border-gold-muted/50 text-gold-muted font-bold text-xs uppercase tracking-wider hover:border-gold hover:text-gold transition-all"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        );
-    };
-
     return (
-        <div className="bg-emerald-deep/40 backdrop-blur-xl p-8 border border-gold-muted/20 flex flex-col h-[600px] lg:h-[calc(100vh-160px)] sticky top-28 rounded-sm shadow-glow-gold transition-all hover:border-gold-muted/40 group">
-            <div className="mb-8 pb-6 border-b border-gold-muted/10 flex justify-between items-start">
+        <div className="bg-emerald-deep panel-mechanical p-6 flex flex-col h-[600px] lg:h-[calc(100vh-160px)] sticky top-28 rounded-sm shadow-xl transition-all group">
+
+            {/* MECHANICAL HEADER */}
+            <div className="mb-6 pb-4 border-b-2 border-dashed border-gold/20 flex justify-between items-start">
                 <div>
-                    <h2 className="text-2xl font-serif text-gold flex items-center gap-3">
-                        Command Center
+                    <h2 className="text-2xl font-serif text-gold flex items-center gap-3 uppercase tracking-tighter">
+                        Command Deck
                     </h2>
-                    <p className="text-[10px] font-sans font-bold text-gray-500 mt-2 uppercase tracking-[0.25em]">
-                        Your Digital Butler • Gemini 2.5 Flash
+                    <p className="text-[10px] font-bold text-gold-muted mt-1 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                        Gemini 2.5 Flash // Online
                     </p>
                 </div>
-                <div className="p-2 border border-gold/30 rounded-full bg-gold/5 text-gold animate-pulse-slow">
-                    <Wand2 className="w-5 h-5" />
-                </div>
+                {/* Replaced Icon with NeuralOrb */}
+                <NeuralOrb isProcessing={isProcessing} />
             </div>
 
-            {/* AI Not Configured Warning */}
+            {/* AI WARNING */}
             {!aiAvailable && (
-                <div className="mb-4 p-4 bg-crimson/20 border border-crimson/50 rounded-sm">
-                    <p className="text-crimson text-xs font-bold uppercase tracking-wider mb-1">
-                        ⚠️ AI Not Configured
-                    </p>
-                    <p className="text-ivory/70 text-[11px]">
-                        Add <code className="bg-black/30 px-1 rounded">VITE_GEMINI_API_KEY</code> to your <code className="bg-black/30 px-1 rounded">.env</code> file.
+                <div className="mb-4 p-3 bg-crimson/10 border-l-4 border-crimson">
+                    <p className="text-crimson text-xs font-bold uppercase tracking-wider">
+                        ⚠️ SYSTEM OFFLINE: API KEY MISSING
                     </p>
                 </div>
             )}
 
-            {/* Proactive Suggestions */}
-            {aiAvailable && (suggestions.length > 0 || isLoadingSuggestions) && (
-                <div className="mb-4 p-3 bg-emerald-deep/60 border border-gold-muted/20 rounded-sm">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2 text-gold-muted">
-                            <Lightbulb className="w-4 h-4" />
-                            <span className="text-[10px] uppercase tracking-wider font-bold">Suggestions</span>
-                        </div>
-                        <button
-                            onClick={handleRefreshSuggestions}
-                            disabled={isLoadingSuggestions}
-                            className="p-1 text-gold-muted hover:text-gold transition-colors disabled:opacity-50"
-                            title="Refresh suggestions"
-                        >
-                            <RefreshCw className={`w-3 h-3 ${isLoadingSuggestions ? 'animate-spin' : ''}`} />
-                        </button>
+            {/* HEADS UP DISPLAY (HUD) - Replaces tag cloud */}
+            {aiAvailable && suggestions.length > 0 && !pendingAction && (
+                <div className="mb-6 relative group/hud">
+                    <div className="absolute -top-3 left-3 bg-emerald-deep px-2 text-[10px] font-bold text-gold/60 uppercase tracking-widest border border-gold/20 rounded z-10">
+                        Intel Feed
                     </div>
-                    {isLoadingSuggestions ? (
-                        <div className="flex items-center gap-2 text-xs text-ivory/50 italic">
-                            <div className="w-3 h-3 border border-gold-muted/30 border-t-gold rounded-full animate-spin" />
-                            Thinking...
+                    <div className="border border-gold/20 p-4 pt-5 bg-black/20 rounded-sm">
+                        <div className="flex justify-between items-start">
+                            <div className="space-y-1 w-full">
+                                {suggestions.slice(0, 2).map((s, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleSuggestionClick(s)}
+                                        className="w-full text-left text-xs text-gold-muted hover:text-gold hover:bg-gold/10 p-1.5 rounded transition-all flex items-center gap-2 group/item"
+                                    >
+                                        <Lightbulb className="w-3 h-3 text-gold/50 group-hover/item:text-gold" />
+                                        <span className="truncate">"{s.text}"</span>
+                                    </button>
+                                ))}
+                            </div>
+                            <button onClick={handleRefreshSuggestions} className="text-gold-muted hover:text-gold p-1">
+                                <RefreshCw className={`w-3 h-3 ${isLoadingSuggestions ? 'animate-spin' : ''}`} />
+                            </button>
                         </div>
-                    ) : (
-                        <div className="flex flex-wrap gap-2">
-                            {suggestions.map((suggestion, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleSuggestionClick(suggestion)}
-                                    className={`px-3 py-1.5 text-[10px] border rounded-full transition-all cursor-pointer ${getSuggestionColor(suggestion.type)}`}
-                                    title={`Click to auto-fill: "${suggestion.action}"`}
-                                >
-                                    {suggestion.text}
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                    </div>
                 </div>
             )}
 
-            <textarea
-                value={commandInput}
-                onChange={handleCommandChange}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                        handleProcessCommand();
-                    }
-                }}
-                placeholder={`Tell me what needs to be done...\n\n"Add a dinner meeting with Sarah tomorrow"\n"Mark all shopping tasks as done"\n"What's overdue?"`}
-                className="flex-grow w-full p-6 bg-emerald-deep/60 border border-gold-muted/20 focus:border-gold/60 focus:bg-emerald-deep/80 transition-all resize-none text-ivory placeholder:text-gray-600 focus:outline-none text-sm leading-loose font-serif italic rounded-sm scrollbar-thin"
-                spellCheck={false}
-            />
+            {/* TERMINAL INPUT */}
+            <div className="relative flex-grow flex flex-col group/input">
+                <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-gold/50"></div>
+                <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-gold/50"></div>
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-gold/50"></div>
+                <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-gold/50"></div>
 
-            <div className="mt-8 space-y-4">
+                <textarea
+                    value={commandInput}
+                    onChange={handleCommandChange}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                            handleProcessCommand();
+                        }
+                    }}
+                    placeholder={"> AWAITING ORDERS...\n> \"Schedule a meeting with Sarah\"\n> \"What needs attention?\""}
+                    className="flex-grow w-full p-4 bg-black/50 border border-gold/10 focus:border-gold/50 transition-all resize-none text-ivory placeholder:text-gold-muted/30 focus:outline-none text-sm font-mono leading-relaxed scrollbar-thin uppercase tracking-wide"
+                    spellCheck={false}
+                />
+            </div>
+
+            {/* MECHANICAL CONTROLS */}
+            <div className="mt-6 grid grid-cols-2 gap-4">
+                {/* PRIMARY ACTION */}
                 <button
                     onClick={handleProcessCommand}
                     disabled={isProcessing || !commandInput.trim() || !!pendingAction}
-                    className={`w-full py-4 px-6 font-bold text-emerald-deep flex items-center justify-center gap-3 transition-all transform uppercase tracking-[0.2em] text-xs relative overflow-hidden
+                    className={`btn-mechanical py-4 text-xs tracking-[0.2em] relative group overflow-hidden
                     ${isProcessing || !commandInput.trim() || pendingAction
-                            ? 'bg-gray-800/50 cursor-not-allowed text-gray-600'
-                            : 'bg-gradient-to-r from-gold-muted via-gold to-gold-muted hover:shadow-glow-gold hover:scale-[1.02]'
+                            ? 'opacity-50 grayscale'
+                            : 'hover:text-amber-500' // Gold highlight on hover
                         }`}
                 >
                     {isProcessing ? (
-                        <>
-                            <div className="w-4 h-4 border-2 border-emerald-deep/30 border-t-emerald-deep rounded-full animate-spin" />
-                            Processing...
-                        </>
+                        <span className="animate-pulse">PROCESSING...</span>
                     ) : (
-                        <>
-                            <Sparkles className="w-4 h-4" />
-                            Execute
-                        </>
+                        <span className="flex items-center gap-2">
+                            <Zap className="w-4 h-4" />
+                            EXECUTE
+                        </span>
                     )}
                 </button>
 
-                {/* Confirmation Preview */}
-                {renderConfirmation()}
-
-                {/* AI Response with Undo */}
-                {aiResponse && (
-                    <div className="p-4 bg-emerald-light/20 border border-gold-muted/20 text-xs text-ivory/90 font-sans leading-relaxed animate-in fade-in slide-in-from-top-2 rounded-sm">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <span className="font-bold mr-2 text-gold not-italic uppercase tracking-wider">Butler:</span>
-                                <span className="italic">{aiResponse}</span>
-                            </div>
-                            {showUndo && undoState && (
-                                <button
-                                    onClick={handleUndo}
-                                    className="ml-4 px-3 py-1 text-[10px] border border-gold-muted/50 text-gold-muted hover:text-gold hover:border-gold transition-all uppercase tracking-wider"
-                                >
-                                    Undo
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {error && (
-                    <p className="text-crimson text-xs font-bold text-center mt-3 uppercase tracking-wider">
-                        {error}
-                    </p>
-                )}
-
-                {/* Keyboard shortcut hint */}
-                <p className="text-center text-[10px] text-gray-600 uppercase tracking-wider">
-                    Press Ctrl+Enter to execute
-                </p>
+                {/* BRAINSTORM ACTION */}
+                <button
+                    onClick={onOpenBrainstorm}
+                    className="btn-mechanical py-4 text-xs tracking-[0.2em] text-emerald-600 hover:text-emerald-500 border-emerald-600/50 shadow-[4px_4px_0px_0px_rgba(5,150,105,0.4)] hover:shadow-[5px_5px_0px_0px_rgba(5,150,105,0.4)] active:shadow-[2px_2px_0px_0px_rgba(5,150,105,0.4)]"
+                >
+                    <span className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        IGNITE IDEA
+                    </span>
+                </button>
             </div>
+
+            {/* CONFIRMATION PANEL */}
+            {pendingAction && (
+                <div className="mt-4 p-4 bg-crimson/10 border-2 border-crimson/50 animate-in fade-in slide-in-from-top-2">
+                    <h4 className="text-crimson font-bold text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4" />
+                        Confirm Usage
+                    </h4>
+                    <div className="space-y-1 text-[10px] text-ivory/80 mb-4 font-mono">
+                        <div className="flex justify-between"><span>ADDITIONS:</span> <span>{pendingAction.response.added.length}</span></div>
+                        <div className="flex justify-between"><span>UPDATES:</span> <span>{pendingAction.response.updated.length}</span></div>
+                        <div className="flex justify-between text-crimson"><span>DELETIONS:</span> <span>{pendingAction.response.deletedIds.length}</span></div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={handleConfirmAction} className="flex-1 bg-crimson text-white text-[10px] font-bold py-2 hover:bg-crimson/80 uppercase">Confirm</button>
+                        <button onClick={handleCancelAction} className="flex-1 border border-crimson/30 text-crimson text-[10px] font-bold py-2 hover:bg-crimson/10 uppercase">Abort</button>
+                    </div>
+                </div>
+            )}
+
+            {/* AI TERMINAL OUTPUT */}
+            {aiResponse && !pendingAction && (
+                <div className="mt-4 p-4 bg-emerald-light/10 border-l-2 border-gold text-xs text-ivory/90 font-mono animate-in fade-in">
+                    <div className="flex justify-between items-start">
+                        <span className="uppercase text-gold mr-2">&gt; RESPONSE:</span>
+                        {showUndo && undoState && (
+                            <button onClick={handleUndo} className="text-[9px] text-gold-muted hover:text-gold underline uppercase">UNDO LAST</button>
+                        )}
+                    </div>
+                    <div className="mt-1 leading-relaxed opacity-80">{aiResponse}</div>
+                </div>
+            )}
+
+            {/* ERROR DISPLAY */}
+            {error && (
+                <div className="mt-3 text-center">
+                    <p className="text-crimson text-[10px] font-mono uppercase bg-crimson/10 inline-block px-2 py-1">{error}</p>
+                </div>
+            )}
+
+            <p className="text-center text-[9px] text-gold-muted/30 uppercase tracking-widest mt-4">
+                CTRL + ENTER TO EXECUTE
+            </p>
         </div>
     );
 };

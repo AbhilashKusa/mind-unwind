@@ -69,29 +69,34 @@
     --c-warn: #f59e0b;
 }
 
-[data-theme="minimal"] {
+/* ROYAL WHITE (Light Mode) - White, Gold, & Pitch Black Text */
+[data-theme="light"] {
     color-scheme: light;
-    /* Minimal - White & Black */
 
-    --c-bg: #ffffff;
-    --c-bg-deep: #f4f4f5;
-    /* Zinc 100 */
-    --c-bg-light: #e4e4e7;
-    /* Zinc 200 */
+    --c-bg: #FFFFFF;
+    /* Pure White */
+    --c-bg-deep: #FDFBF7;
+    /* Very Subtle Warm White (Ivory hint) */
+    --c-bg-light: #F4F4F5;
+    /* Zinc 100 for borders */
 
-    --c-primary: #18181b;
-    /* Zinc 900 */
-    --c-primary-light: #27272a;
-    --c-primary-muted: #71717a;
+    --c-primary: #D4AF37;
+    /* Royal Gold (Matching Onyx) */
+    --c-primary-light: #E6C566;
+    /* Light Gold */
+    --c-primary-muted: #94A3B8;
+    /* Slate 400 - Visible Gray for icons/dates */
 
-    --c-text: #09090b;
-    /* Zinc 950 */
-    --c-text-dim: #52525b;
-    /* Zinc 600 */
+    /* TEXT - MAXIMUM CONTRAST FOR VIABILITY */
+    --c-text: #050505;
+    /* Pitch Black */
+    --c-text-dim: #404040;
+    /* Neutral Grey 700 */
 
-    --c-error: #dc2626;
-    --c-error-bg: #fef2f2;
-    --c-warn: #d97706;
+    --c-error: #DC2626;
+    --c-error-bg: #FEF2F2;
+    --c-warn: #D97706;
+    --color-priority-low: #10b981;
 }
 
 [data-theme="onyx"] {
@@ -138,8 +143,7 @@ body::before {
     height: 100%;
     z-index: -1;
     pointer-events: none;
-    background: radial-gradient(circle at 50% 0%, var(--color-gold-muted) 0%, transparent 70%);
-    opacity: 0.1;
+    background: transparent;
 }
 
 :focus-visible {
@@ -182,5 +186,76 @@ body::before {
     .scrollbar-thin::-webkit-scrollbar-thumb {
         background-color: var(--color-gold-muted);
         border-radius: 20px;
+    }
+
+    /* MECHANICAL UX UTILITIES */
+    .btn-mechanical {
+        position: relative;
+        border: 2px solid var(--c-primary);
+        /* Thick border */
+        background-color: var(--c-bg-light);
+        color: var(--c-primary);
+        box-shadow: 4px 4px 0px 0px var(--c-primary-muted);
+        /* Hard shadow */
+        transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-mechanical:hover:not(:disabled) {
+        transform: translate(-1px, -1px);
+        box-shadow: 5px 5px 0px 0px var(--c-primary-muted);
+        background-color: var(--c-bg);
+    }
+
+    .btn-mechanical:active:not(:disabled) {
+        transform: translate(2px, 2px);
+        /* Physical depression */
+        box-shadow: 2px 2px 0px 0px var(--c-primary-muted);
+    }
+
+    .btn-mechanical:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+        border-color: var(--c-primary-muted);
+        color: var(--c-primary-muted);
+    }
+
+    .panel-mechanical {
+        border: 2px solid var(--c-primary-muted);
+        background-color: var(--c-bg-deep);
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+        /* Inner depth */
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Corner brackets for panels */
+    .panel-mechanical::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 10px;
+        height: 10px;
+        border-top: 2px solid var(--c-primary);
+        border-left: 2px solid var(--c-primary);
+    }
+
+    .panel-mechanical::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        border-bottom: 2px solid var(--c-primary);
+        border-right: 2px solid var(--c-primary);
     }
 }

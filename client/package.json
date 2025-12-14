@@ -15,11 +15,15 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@google/genai": "^1.30.0",
     "@gsap/react": "^2.1.2",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.4.2",
     "@tailwindcss/postcss": "^4.1.17",
+    "@types/three": "^0.182.0",
     "gsap": "^3.13.0",
     "lucide-react": "^0.560.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "three": "^0.182.0",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
