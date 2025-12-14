@@ -50,7 +50,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-dark/90 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="bg-emerald-deep border border-gold/30 shadow-glow-gold p-8 w-full max-w-md relative overflow-hidden group">
+            <div className="bg-emerald-deep border border-gold/30 shadow-glow-gold p-6 md:p-8 w-full max-w-md relative overflow-hidden group">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-gold/20 rounded-tl-lg"></div>
                 <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-gold/20 rounded-br-lg"></div>

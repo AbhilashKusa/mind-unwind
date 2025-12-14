@@ -136,7 +136,7 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 md:pt-[20vh] px-4 bg-emerald-deep/80 backdrop-blur-md transition-opacity animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-14 md:pt-[20vh] px-4 bg-emerald-deep/80 backdrop-blur-md transition-opacity animate-in fade-in duration-200">
             <div className="w-full max-w-xl md:max-w-2xl bg-[#0a1f1c] border border-gold/20 rounded-sm shadow-2xl shadow-black/50 overflow-hidden flex flex-col animate-in slide-in-from-top-4 duration-300 ring-1 ring-gold/10">
 
                 {/* Search Bar Region */}
@@ -167,7 +167,7 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
                 </div>
 
                 {/* Content Area */}
-                <div className="max-h-[60vh] overflow-y-auto p-4 custom-scrollbar">
+                <div className="max-h-[70vh] md:max-h-[60vh] overflow-y-auto p-4 custom-scrollbar">
 
                     {/* Default State: Suggestions */}
                     {!input && !aiResponse && !pendingAction && (
@@ -255,7 +255,7 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
                 </div>
 
                 {/* Footer / Context Info */}
-                <div className="p-3 border-t border-gold/5 bg-black/40 flex justify-between items-center text-[10px] text-ivory/40 uppercase tracking-widest font-bold">
+                <div className="p-3 border-t border-gold/5 bg-black/40 flex justify-between items-center text-[11px] md:text-xs text-ivory/40 uppercase tracking-widest font-bold">
                     <div className="flex gap-4">
                         <span className="flex items-center gap-1.5"><span className="bg-white/10 px-1 rounded">⌘</span> <span className="pt-0.5">Toggle</span></span>
                         <span className="flex items-center gap-1.5"><span className="bg-white/10 px-1 rounded">ESC</span> <span className="pt-0.5">Close</span></span>
