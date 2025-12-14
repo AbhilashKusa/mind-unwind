@@ -1,82 +1,69 @@
-# Deployment Guide for Mind Unwind
+# Frontend Deployment Guide
 
-This guide covers how to deploy the **Mind Unwind** application to production.
+Deploy the Mind Unwind frontend to Vercel.
 
 ## Prerequisites
 
-- **Node.js**: v18 or higher
-- **npm**: v9 or higher
-- **Gemini API Key**: You need a valid API key from Google AI Studio.
+- [Vercel account](https://vercel.com)
+- [Vercel CLI](https://vercel.com/cli) (optional)
+- Backend already deployed (see `../server/DEPLOYMENT.md`)
+
+## Quick Deploy
+
+### Option 1: Vercel CLI
+
+```bash
+cd client
+npm install -g vercel
+vercel login
+vercel --prod
+```
+
+### Option 2: Vercel Dashboard
+
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Import your GitHub repository
+3. Set root directory to `client`
+4. Add environment variables (see below)
+5. Deploy
 
 ## Environment Variables
 
-Ensure your production environment has the following variables set. reference `.env.example` for a template.
+Set these in Vercel Dashboard → Project → Settings → Environment Variables:
 
-| Variable | Description | Example |
-| :--- | :--- | :--- |
-| `VITE_GEMINI_API_KEY` | **Required**. Your Google Gemini API Key. | `AIzaSy...` |
-| `VITE_API_URL` | Optional. Backend API URL if you have a separate backend. | `https://api.myapp.com` |
-| `VITE_OLLAMA_URL` | Optional. URL for Ollama fallback (local/custom hosting). | `http://localhost:11434` |
+| Variable | Value | Required |
+|----------|-------|----------|
+| `VITE_API_URL` | `https://your-backend.onrender.com/api` | ✅ Yes |
+| `VITE_GEMINI_API_KEY` | Your Google Gemini API key | ✅ Yes |
+| `VITE_OLLAMA_URL` | Ollama URL (optional fallback) | ❌ No |
 
----
+## Build Settings
 
-## Deployment Options
+Vercel auto-detects Vite, but if needed:
 
-### 1. Static Hosting (Vercel, Netlify, Cloudflare Pages)
+| Setting | Value |
+|---------|-------|
+| Framework | Vite |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+| Install Command | `npm install` |
 
-Since **Mind Unwind** is a Client-Side Rendered (CSR) React application (Vite), it is best deployed to a static host.
+## Custom Domain
 
-#### Vercel (Recommended)
-1. Install Vercel CLI: `npm i -g vercel`
-2. Run `vercel` in the project root.
-3. Follow the prompts.
-4. Go to the Vercel Dashboard -> Settings -> Environment Variables and add `VITE_GEMINI_API_KEY`.
+1. Go to Project → Settings → Domains
+2. Add your custom domain
+3. Follow DNS configuration instructions
 
-#### Netlify
-1. Drag and drop the `dist` folder to Netlify Drop (for manual deploy) OR connect your Git repository.
-2. In Site Settings -> Build & Deploy -> Environment, add `VITE_GEMINI_API_KEY`.
-3. Build Command: `npm run build`
-4. Publish Directory: `dist`
+## Troubleshooting
 
-### 2. Docker Container
+### API calls return 404
+- Ensure `VITE_API_URL` is set correctly
+- Redeploy after adding environment variables
 
-You can containerize the application using Nginx to serve the static files.
+### Manifest 401 error
+- This is normal for preview deployments (password protected)
+- Use the production URL instead
 
-**Build the image:**
-```bash
-docker build -t mind-unwind-client .
-```
-
-**Run the container:**
-```bash
-docker run -p 80:80 -e VITE_GEMINI_API_KEY=your_key mind-unwind-client
-```
-
-*(Note: Since Vite variables are embedded at build time, for Docker you usually need to pass build args or use a runtime config injection strategy if you want to change keys without rebuilding).*
-
-### 3. Traditional Web Server (Nginx/Apache)
-
-1. Run `npm run build` locally.
-2. Upload the contents of the `dist` folder to your web server's public root (e.g., `/var/www/html`).
-3. Configure your server to redirect all 404s to `index.html` (for Client-Side Routing).
-
-**Nginx Example Config:**
-```nginx
-server {
-    listen 80;
-    server_name example.com;
-    root /var/www/html;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
-## Post-Deployment Verification
-
-1. Open the production URL.
-2. Check the browser console for any errors.
-3. Try adding a task to verify the AI integration (Gemini) is working.
-    - *Note: If you see checking for Ollama warnings in console, that is expected behavior for the fallback mechanism.*
+### Build fails
+- Check that all dependencies are in `dependencies` (not `devDependencies`)
+- Verify TypeScript has no errors: `npx tsc --noEmit`

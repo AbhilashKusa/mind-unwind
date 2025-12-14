@@ -1,53 +1,78 @@
-# Backend Deployment Guide (Render)
+# Backend Deployment Guide
 
-We recommend using **Render** for the backend because it provides both the Node.js web service and the PostgreSQL database in one platform, with a generous free tier.
+Deploy the Mind Unwind backend to Render.
 
-## 1. Prepare your Code
+## Prerequisites
 
-Ensure your code is pushed to a Git repository (GitHub/GitLab/Bitbucket).
+- [Render account](https://render.com)
+- GitHub repository connected to Render
 
-## 2. Create the Database (PostgreSQL)
+## Deployment Steps
 
-1.  Log in to [Render Dashboard](https://dashboard.render.com/).
-2.  Click **New +** -> **PostgreSQL**.
-3.  Name: `mind-unwind-db` (or similar).
-4.  Region: Choose one close to you (e.g., Ohio, Frankfurt).
-5.  Instance Type: **Free** (for hobby/dev) or Starter.
-6.  Click **Create Database**.
-7.  **IMPORTANT:** Copy the **Internal Database URL** and keep it safe. You will need the host, user, password, etc., for the next step.
-    *   Find these details in the "Info" tab or "Connect" dropdown.
+### 1. Create PostgreSQL Database
 
-## 3. Deploy the Web Service (Node.js)
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click **New** → **PostgreSQL**
+3. Configure:
+   - **Name**: `mind-unwind-db`
+   - **Region**: Choose closest to your users
+   - **Plan**: Free (or paid for production)
+4. Click **Create Database**
+5. Copy the **Internal Database URL**
 
-1.  Click **New +** -> **Web Service**.
-2.  Connect your Git repository.
-3.  Name: `mind-unwind-api`.
-4.  Root Directory: `server`.
-5.  Runtime: **Node**.
-6.  Build Command: `npm install`.
-7.  Start Command: `node server.js` (or `npm start`).
-8.  **Environment Variables**: Click "Advanced" or "Environment" and add:
+### 2. Create Web Service
 
-    | Key | Value |
-    | :--- | :--- |
-    | `DB_HOST` | Your DB Host (from Step 2) |
-    | `DB_NAME` | Your DB Name (from Step 2) |
-    | `DB_USER` | Your DB User (from Step 2) |
-    | `DB_PASSWORD` | Your DB Password (from Step 2) |
-    | `DB_PORT` | `5432` |
-    | `JWT_SECRET` | A long random string (e.g., `s3cr3t_k3y_123`) |
-    | `CLIENT_URL` | Your Vercel Frontend URL (e.g., `https://mind-unwind...vercel.app`) - *Important for CORS* |
-    | `NODE_ENV` | `production` |
+1. Click **New** → **Web Service**
+2. Connect your GitHub repository
+3. Configure:
+   - **Name**: `mind-unwind-api`
+   - **Root Directory**: `server`
+   - **Runtime**: Node
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+4. Add environment variables (see below)
+5. Click **Create Web Service**
 
-9.  Click **Create Web Service**.
+## Environment Variables
 
-## 4. Connect Frontend to Backend
+Set these in Render → Web Service → Environment:
 
-Once the backend is live (Render will give you a URL like `https://mind-unwind-api.onrender.com`):
+| Variable | Value | Required |
+|----------|-------|----------|
+| `DATABASE_URL` | PostgreSQL Internal URL from step 1 | ✅ Yes |
+| `JWT_SECRET` | Random 32+ character string | ✅ Yes |
+| `NODE_ENV` | `production` | ✅ Yes |
+| `CLIENT_URL` | `https://your-frontend.vercel.app` | ✅ Yes |
 
-1.  Go back to your **Vercel Project Settings**.
-2.  Add/Update the Environment Variable:
-    *   `VITE_API_URL`: `https://mind-unwind-api.onrender.com/api` (Make sure to include `/api` if your endpoints expect it, or just the base URL depending on your frontend code).
-3.  Redeploy the Frontend (`vercel --prod`).
+### Generate JWT Secret
 
-Your full stack application is now live!
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check |
+| `/api/auth/register` | POST | User registration |
+| `/api/auth/login` | POST | User login |
+| `/api/tasks` | GET | Get all tasks |
+| `/api/tasks` | POST | Create task |
+| `/api/tasks/:id` | PUT | Update task |
+| `/api/tasks/:id` | DELETE | Delete task |
+
+## Troubleshooting
+
+### Service won't start
+- Check logs in Render Dashboard
+- Verify all environment variables are set
+- Ensure `morgan` is in `dependencies` (not `devDependencies`)
+
+### Database connection fails
+- Use the **Internal Database URL** (not External)
+- Verify `DATABASE_URL` is set correctly
+
+### Cold starts (free tier)
+- First request after 15 minutes of inactivity may take 30-60 seconds
+- This is normal for Render's free tier
