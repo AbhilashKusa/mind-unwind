@@ -47,6 +47,10 @@ export const api = {
             body: JSON.stringify(task),
         });
         handleAuthError(res);
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to create task');
+        }
     },
 
     updateTask: async (task: Task): Promise<void> => {
