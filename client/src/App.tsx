@@ -335,7 +335,7 @@ const App: React.FC = () => {
 
                         {viewMode === 'list' && (
                             <>
-                                {tasks.length === 0 ? <EmptyState /> : (
+                                {sortedTasks.length === 0 ? <EmptyState /> : (
                                     <div className="space-y-4 pb-20">
                                         {sortedTasks.map(task => (
                                             <TaskCard
