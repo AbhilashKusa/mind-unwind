@@ -35,12 +35,13 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
+          'vendor-3d': ['three', '@react-three/fiber', '@react-three/drei'],
           'vendor-gsap': ['gsap', '@gsap/react'],
-          'vendor-ui': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities']
+          'vendor-ui': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', 'lucide-react']
         }
       }
     },
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1600
   },
   server: {
     proxy: {
