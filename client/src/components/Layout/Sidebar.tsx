@@ -61,6 +61,16 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentTheme, onChangeVi
                         </button>
                     );
                 })}
+
+                {/* Profile Button - Mobile Only */}
+                <button
+                    onClick={onProfileClick}
+                    className="lg:hidden relative group p-2 rounded-xl transition-all duration-300 flex flex-col items-center gap-1 text-gold-muted hover:text-ivory"
+                    title="Profile"
+                >
+                    <User className="w-6 h-6 relative z-10" />
+                    <span className="sr-only">Profile</span>
+                </button>
             </nav>
 
             {/* Bottom Actions (Desktop) */}
