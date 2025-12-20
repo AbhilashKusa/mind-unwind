@@ -142,7 +142,7 @@ const App: React.FC = () => {
         await addTask(newTask);
         setManualTitle('');
         setManualAddOpen(false);
-        showToast("New task recorded in the archives.");
+        showToast("New task created.");
     };
 
     const handleBrainstormAdd = async (generatedTasks: GeneratedTaskData[]) => {
@@ -162,7 +162,7 @@ const App: React.FC = () => {
             };
             await addTask(newTask);
         }
-        showToast(`${generatedTasks.length} ideas manifested.`);
+        showToast(`${generatedTasks.length} ideas added.`);
         setViewMode('list'); // Switch back to list to see them
     };
 
@@ -175,10 +175,10 @@ const App: React.FC = () => {
             for (const t of optimizedTasks) {
                 await updateTask(t);
             }
-            showToast("Your schedule has been curated.");
+            showToast("Schedule optimized.");
         } catch (e) {
             console.error(e);
-            showToast("The algorithm faltered.", 'error');
+            showToast("Optimization failed.", 'error');
         } finally {
             setIsOptimizing(false);
         }
@@ -189,13 +189,13 @@ const App: React.FC = () => {
         const task = tasks.find(t => t.id === id);
         // If we just completed it
         if (task && !task.isCompleted) {
-            showToast("Task Completed (Tranquility Increased).");
+            showToast("Task Completed.");
         }
     }
 
     const handleDeleteTask = async (id: string) => {
         await deleteTask(id);
-        showToast("Task Permanently Deleted (Banished).", "info");
+        showToast("Task Permanently Deleted.", "info");
     }
 
     const handleOpenFocus = (task: Task) => {
@@ -206,7 +206,7 @@ const App: React.FC = () => {
     const handleCompleteInFocus = async (task: Task) => {
         if (!task.isCompleted) {
             await toggleTask(task.id);
-            showToast("Task Vanquished in the Focus Chamber.");
+            showToast("Task Completed in Focus mode.");
         }
     };
 
@@ -281,7 +281,7 @@ const App: React.FC = () => {
                     <div className="flex justify-between items-end mb-8 border-b border-gold/10 pb-4">
                         <div>
                             <h1 className="text-3xl font-serif text-ivory tracking-tight">
-                                {viewMode === 'concierge' ? 'Royal Command' :
+                                {viewMode === 'concierge' ? 'Command Center' :
                                     viewMode === 'list' ? 'Your Tasks' :
                                         viewMode === 'board' ? 'Task Board' :
                                             'Calendar'}
@@ -327,7 +327,7 @@ const App: React.FC = () => {
                                         disabled={isOptimizing}
                                         className="w-full py-4 bg-emerald-light/30 border border-gold/30 text-gold font-bold uppercase tracking-[0.2em] text-xs hover:bg-gold hover:text-emerald-deep transition-all duration-300 disabled:opacity-50 hover:shadow-glow-gold"
                                     >
-                                        {isOptimizing ? 'Curating...' : 'Optimize Layout'}
+                                        {isOptimizing ? 'Optimizing...' : 'Optimize Layout'}
                                     </button>
                                 </div>
                             </div>
@@ -353,12 +353,12 @@ const App: React.FC = () => {
                         )}
 
                         {viewMode === 'board' && (
-                            <BoardView tasks={tasks} onTaskClick={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }} />
+                            <BoardView tasks={sortedTasks} onTaskClick={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }} />
                         )}
 
                         {viewMode === 'calendar' && (
                             <CalendarView
-                                tasks={tasks}
+                                tasks={sortedTasks}
                                 onTaskClick={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }}
                                 onDateSelect={(d) => { setSelectedDayDate(d); setIsDayBoardOpen(true); }}
                             />

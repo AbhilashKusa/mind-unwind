@@ -63,7 +63,7 @@ describe('Integration: Add Task', () => {
         fireEvent.click(quickAddBtn);
 
         // Expect Modal/Form
-        expect(await screen.findByText('Inscribe Task')).toBeInTheDocument();
+        expect(await screen.findByText('New Task')).toBeInTheDocument();
 
         // Fill input
         // Updated placeholder to match Sabyasachi design
@@ -72,7 +72,7 @@ describe('Integration: Add Task', () => {
 
         // Submit
         // Updated button text to match Sabyasachi design
-        const submitBtn = screen.getByText('Add to Sanctuary');
+        const submitBtn = screen.getByText('Add Task');
         fireEvent.click(submitBtn);
 
         // Expect task to appear in list (Optimistic update)
