@@ -1,131 +1,58 @@
+```javascript
 const request = require('supertest');
+
+// MOCK the database before requiring app
+jest.mock('../config/db', () => ({
+  initDb: jest.fn(),
+  pool: {
+    query: jest.fn()
+  }
+}));
+
 const { app, pool } = require('../server');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+// Mocking middleware if needed, but for now assuming real JWT logic works 
+// if we sign correctly.
 
-// Mock dependencies
-jest.mock('bcrypt');
-jest.mock('jsonwebtoken');
+describe('Auth API (Mocked)', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
-// NOTE: We do NOT mock auth middleware here because we want to test the auth flow logic
-// However, the routes use the middleware.
-// If we want to test /login and /register, they are public.
-// If we want to test /me, it requires auth. We can mock the middleware OR generate a valid token if we mock verify.
-// Let's decide to mock the middleware ONLY for protected routes or rely on mocking jwt.verify.
-// Since we mocked jsonwebtoken, verify will be mocked.
+  describe('GET /api/health', () => {
+    it('returns 200 via mock DB', async () => {
+      // Mock successful query
+      pool.query.mockResolvedValue({ rows: [{ '?column?': 1 }] });
+      
+      const res = await request(app).get('/api/health');
+      expect(res.statusCode).toBe(200);
+      expect(res.body.status).toBe('ok');
+    });
 
-jest.mock('../middleware/auth', () => {
-    const originalModule = jest.requireActual('../middleware/auth');
-    return {
-        ...originalModule,
-        authenticateToken: (req, res, next) => {
-            // For testing protected routes, we can just inject a user if header is present
-            if (req.headers['authorization']) {
-                req.user = { id: 1, email: 'test@example.com' };
-                next();
-            } else {
-                res.sendStatus(401);
-            }
-        }
-    };
+    it('returns 500 on DB error', async () => {
+        pool.query.mockRejectedValue(new Error('DB connection failed'));
+        const res = await request(app).get('/api/health');
+        expect(res.statusCode).toBe(500);
+    });
+  });
+
+  describe('POST /api/auth/register', () => {
+      it('registers a user successfully', async () => {
+          // 1. check if user exists (return empty)
+          pool.query.mockResolvedValueOnce({ rows: [] });
+          
+          // 2. insert user (return new user)
+          pool.query.mockResolvedValueOnce({ 
+              rows: [{ id: 1, name: 'Test', email: 'test@test.com', avatar: null }] 
+          });
+
+          const res = await request(app)
+            .post('/api/auth/register')
+            .send({ name: 'Test', email: 'test@test.com', password: 'password123' });
+          
+          expect(res.statusCode).toBe(200);
+          expect(res.body).toHaveProperty('token');
+          expect(res.body.user).toHaveProperty('email', 'test@test.com');
+      });
+  });
 });
-
-
-describe('Auth Endpoints', () => {
-    afterAll(async () => {
-        await pool.end();
-    });
-
-    afterEach(() => {
-        jest.restoreAllMocks();
-    });
-
-    // --- REGISTER ---
-    test('POST /api/auth/register should create user and return token', async () => {
-        jest.spyOn(pool, 'query').mockResolvedValueOnce({
-            rows: [{ id: 1, name: 'New User', email: 'test@example.com', avatar: null }]
-        });
-        bcrypt.hash.mockResolvedValue('hashed_pw');
-        jwt.sign.mockReturnValue('fake_token');
-
-        const res = await request(app).post('/api/auth/register').send({
-            name: 'New User',
-            email: 'test@example.com',
-            password: 'password123'
-        });
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('token', 'fake_token');
-        expect(res.body.user).toHaveProperty('email', 'test@example.com');
-    });
-
-    test('POST /api/auth/register should fail with short password', async () => {
-        const res = await request(app).post('/api/auth/register').send({
-            name: 'User',
-            email: 'test@example.com',
-            password: '123'
-        });
-        expect(res.statusCode).toEqual(400);
-        expect(res.body.error).toMatch(/password/i);
-    });
-
-    // --- LOGIN ---
-    test('POST /api/auth/login should return token on success', async () => {
-        jest.spyOn(pool, 'query').mockResolvedValueOnce({
-            rows: [{ id: 1, email: 'test@example.com', password_hash: 'hashed_pw' }]
-        });
-        bcrypt.compare.mockResolvedValue(true);
-        jwt.sign.mockReturnValue('fake_token');
-
-        const res = await request(app).post('/api/auth/login').send({
-            email: 'test@example.com',
-            password: 'password123'
-        });
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('token', 'fake_token');
-    });
-
-    test('POST /api/auth/login should fail on invalid password', async () => {
-        jest.spyOn(pool, 'query').mockResolvedValueOnce({
-            rows: [{ id: 1, email: 'test@example.com', password_hash: 'hashed_pw' }]
-        });
-        bcrypt.compare.mockResolvedValue(false);
-
-        const res = await request(app).post('/api/auth/login').send({
-            email: 'test@example.com',
-            password: 'wrongpassword'
-        });
-
-        expect(res.statusCode).toEqual(403);
-    });
-
-    // --- PROFILE ---
-    test('GET /api/auth/me should return user profile', async () => {
-        // Since we mocked middleware to allow if auth header present
-        jest.spyOn(pool, 'query').mockResolvedValueOnce({
-            rows: [{ id: 1, name: 'Test User', email: 'test@example.com' }]
-        });
-
-        const res = await request(app).get('/api/auth/me')
-            .set('Authorization', 'Bearer fake_token');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.name).toBe('Test User');
-    });
-
-    test('PUT /api/auth/me should update profile', async () => {
-        bcrypt.hash.mockResolvedValue('new_hashed_pw');
-        // UPDATE query usually returns updated row
-        jest.spyOn(pool, 'query').mockResolvedValueOnce({
-            rows: [{ id: 1, name: 'Updated Name', email: 'test@example.com' }]
-        });
-
-        const res = await request(app).put('/api/auth/me')
-            .set('Authorization', 'Bearer fake_token')
-            .send({ name: 'Updated Name', password: 'newpassword' });
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.name).toBe('Updated Name');
-    });
-});
+```

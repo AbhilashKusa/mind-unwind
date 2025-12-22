@@ -58,7 +58,7 @@ export interface AICommandResponse {
   aiResponse: string; // A brief message from the AI explaining what it did
 }
 
-export type ViewMode = 'list' | 'board' | 'calendar' | 'concierge';
+export type ViewMode = 'list' | 'board' | 'calendar' | 'concierge' | 'dashboard';
 export type ThemeType = 'onyx' | 'minimal';
 export type WorkspaceType = 'office' | 'personal' | 'startup';
 

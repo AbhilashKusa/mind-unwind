@@ -5,6 +5,10 @@ const { authenticateToken } = require('../middleware/auth');
 
 router.get('/', authenticateToken, async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 100; // Default limit 100
+        const offset = (page - 1) * limit;
+
         const result = await pool.query(`
       SELECT 
         id, title, description, priority, category, is_completed, 
@@ -13,7 +17,8 @@ router.get('/', authenticateToken, async (req, res) => {
       FROM tasks 
       WHERE user_id = $1
       ORDER BY is_completed ASC, created_at DESC
-    `, [req.user.id]);
+      LIMIT $2 OFFSET $3
+    `, [req.user.id, limit, offset]);
 
         const tasks = result.rows.map(row => ({
             id: row.id,

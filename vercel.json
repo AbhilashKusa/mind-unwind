@@ -1,0 +1,19 @@
+{
+    "version": 2,
+    "alias": "mind-unwind.vercel.app",
+    "builds": [
+        {
+            "src": "client/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/client/$1"
+        }
+    ]
+}

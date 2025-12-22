@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { X, Calendar } from 'lucide-react';
-import { Priority } from '../types';
+import { Priority, WorkspaceType } from '../types';
 
 interface ManualAddModalProps {
     isOpen: boolean;
@@ -14,10 +14,12 @@ interface ManualAddModalProps {
     setPriority: (val: Priority) => void;
     dueDate: string;
     setDueDate: (val: string) => void;
+    workspace: WorkspaceType;
+    setWorkspace: (val: WorkspaceType) => void;
 }
 
 export const ManualAddModal: React.FC<ManualAddModalProps> = ({
-    isOpen, onClose, onAdd, title, setTitle, priority, setPriority, dueDate, setDueDate
+    isOpen, onClose, onAdd, title, setTitle, priority, setPriority, dueDate, setDueDate, workspace, setWorkspace
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +78,26 @@ export const ManualAddModal: React.FC<ManualAddModalProps> = ({
                         </div>
                     </div>
 
+                    {/* Workspace Select */}
+                    <div>
+                        <label className="block text-xs font-bold uppercase text-gold-muted mb-2 tracking-widest">Bucket</label>
+                        <div className="flex gap-3">
+                            {['personal', 'office', 'startup'].map(w => (
+                                <button
+                                    key={w}
+                                    type="button"
+                                    onClick={() => setWorkspace(w as WorkspaceType)}
+                                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest border transition-all duration-300 ${workspace === w
+                                        ? 'bg-emerald-light/50 text-gold border-gold shadow-glow-sm'
+                                        : 'bg-transparent text-gold-muted border-gold-muted/30 hover:border-gold/50'
+                                        }`}
+                                >
+                                    {w}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Date Select */}
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-gold-muted uppercase tracking-widest">
@@ -99,7 +121,7 @@ export const ManualAddModal: React.FC<ManualAddModalProps> = ({
                         Add Task
                     </button>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };

@@ -13,3 +13,9 @@ node_modules
 .vscode
 .idea
 .vercel
+
+# Build Artifacts
+client/dist
+client/coverage
+server/coverage
+*.txt

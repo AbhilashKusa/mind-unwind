@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { AppState, Task, User, ViewMode, ThemeType, WorkspaceType } from '../types';
 import { api } from '../services/api';
@@ -34,6 +35,7 @@ interface StoreState extends AppState {
     isProfileOpen: boolean;
     setProfileOpen: (isOpen: boolean) => void;
     updateUserProfile: (name: string, password?: string) => Promise<void>;
+    refreshTasks: () => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -132,16 +134,19 @@ export const useStore = create<StoreState>((set, get) => ({
 
     addTask: async (task) => {
         // Optimistic update
+        const previousTasks = get().tasks;
         set(state => ({ tasks: [task, ...state.tasks] }));
         try {
             await api.createTask(task);
         } catch (error) {
             console.error('Failed to add task:', error);
-            // Rollback could be added here
+            // Rollback
+            set({ tasks: previousTasks });
         }
     },
 
     toggleTask: async (id) => {
+        const previousTasks = get().tasks;
         set(state => ({
             tasks: state.tasks.map(t =>
                 t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
@@ -155,11 +160,13 @@ export const useStore = create<StoreState>((set, get) => ({
                 await api.updateTask(task);
             } catch (error) {
                 console.error('Failed to toggle task:', error);
+                set({ tasks: previousTasks });
             }
         }
     },
 
     deleteTask: async (id) => {
+        const previousTasks = get().tasks;
         set(state => ({
             tasks: state.tasks.filter(t => t.id !== id)
         }));
@@ -167,10 +174,12 @@ export const useStore = create<StoreState>((set, get) => ({
             await api.deleteTask(id);
         } catch (error) {
             console.error('Failed to delete task:', error);
+            set({ tasks: previousTasks });
         }
     },
 
     updateTask: async (task) => {
+        const previousTasks = get().tasks;
         set(state => ({
             tasks: state.tasks.map(t => t.id === task.id ? task : t)
         }));
@@ -178,6 +187,7 @@ export const useStore = create<StoreState>((set, get) => ({
             await api.updateTask(task);
         } catch (error) {
             console.error('Failed to update task:', error);
+            set({ tasks: previousTasks });
         }
     },
 
@@ -206,6 +216,15 @@ export const useStore = create<StoreState>((set, get) => ({
         } catch (e) {
             console.error(e);
             throw e;
+        }
+    },
+
+    refreshTasks: async () => {
+        try {
+            const tasks = await api.getTasks();
+            set({ tasks });
+        } catch (e) {
+            console.error('Failed to refresh tasks:', e);
         }
     }
 }));

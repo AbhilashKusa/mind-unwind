@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
+import { getPreferredModel, setPreferredModel, AIModelPreference } from '../services/gemini';
+
 import { X } from 'lucide-react';
 
 interface ProfileModalProps {
@@ -13,6 +15,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [aiModel, setAiModel] = useState<AIModelPreference>('auto');
+
+    useEffect(() => {
+        setAiModel(getPreferredModel());
+    }, [isOpen]);
+
+    const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = e.target.value as AIModelPreference;
+        setAiModel(val);
+        setPreferredModel(val);
+    };
 
     useEffect(() => {
         if (isOpen && user) {
@@ -103,6 +116,23 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
                         <div className="w-full py-3 border-b border-white/5 text-ivory/50 font-sans text-sm italic cursor-not-allowed">
                             {user?.email}
                         </div>
+                    </div>
+
+                    {/* AI Model Preference */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-muted">AI Model Preference</label>
+                        <select
+                            value={aiModel}
+                            onChange={handleModelChange}
+                            className="w-full py-3 bg-emerald-dark border-b border-gold-muted/30 focus:border-gold outline-none font-sans text-ivory transition-colors"
+                        >
+                            <option value="auto" className="bg-emerald-deep text-ivory">Auto (Gemini → DeepSeek)</option>
+                            <option value="gemini" className="bg-emerald-deep text-ivory">Force Gemini 2.0 Flash</option>
+                            <option value="deepseek" className="bg-emerald-deep text-ivory">Force DeepSeek V3</option>
+                        </select>
+                        <p className="text-[10px] text-gold-muted/70">
+                            "Auto" uses Gemini for speed, falling back to DeepSeek if needed.
+                        </p>
                     </div>
 
                     <div className="space-y-2 group/input">

@@ -82,6 +82,12 @@ const initDb = async () => {
             }
         }
 
+        // Optimizing Indexes
+        try { await client.query(`CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);`); } catch (e) { }
+        try { await client.query(`CREATE INDEX IF NOT EXISTS idx_tasks_compliance ON tasks(user_id, is_completed);`); } catch (e) { }
+        try { await client.query(`CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at DESC);`); } catch (e) { }
+        try { await client.query(`CREATE INDEX IF NOT EXISTS idx_tasks_workspace ON tasks(user_id, workspace);`); } catch (e) { }
+
         console.log("✅ DB Migration Checked");
         client.release();
     } catch (err) {

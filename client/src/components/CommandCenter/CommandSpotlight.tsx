@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useStore } from '../../store/useStore';
-import { processUserCommand, addToCommandHistory, ProactiveSuggestion, isAIAvailable, parseSlashCommand } from '../../services/gemini';
-import { Sparkles, Command, Trash2, Check, X, Search, Zap, Calendar, CornerDownLeft, AlertCircle } from 'lucide-react';
+import { processUserCommand, addToCommandHistory, parseSlashCommand } from '../../services/gemini';
+import { Command, X, Search, Zap, Calendar, ArrowRight, Sparkles, Check, AlertCircle, CornerDownLeft } from 'lucide-react';
 import { Priority, Task, AICommandResponse } from '../../types';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 
 interface CommandSpotlightProps {
     isOpen: boolean;
@@ -11,12 +13,17 @@ interface CommandSpotlightProps {
 }
 
 export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onClose, currentView }) => {
-    const { tasks, setTasks, addTask, updateTask, deleteTask } = useStore();
+    const { tasks, addTask, updateTask, deleteTask } = useStore();
     const [input, setInput] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [aiResponse, setAiResponse] = useState<string | null>(null);
     const [pendingAction, setPendingAction] = useState<{ response: AICommandResponse, originalCommand: string } | null>(null);
+
+    // Refs for GSAP
+    const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const modalRef = useRef<HTMLDivElement>(null);
+    const resultsRef = useRef<HTMLDivElement>(null);
 
     // Auto-focus input when opened
     useEffect(() => {
@@ -24,6 +31,44 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
             inputRef.current.focus();
         }
     }, [isOpen]);
+
+    // GSAP Animations
+    useGSAP(() => {
+        if (isOpen) {
+            // Reset state
+            gsap.set(modalRef.current, { y: -20, opacity: 0, scale: 0.98 });
+            gsap.set(containerRef.current, { opacity: 0 });
+
+            // Entrance timeline
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            tl.to(containerRef.current, {
+                opacity: 1,
+                duration: 0.3
+            })
+                .to(modalRef.current, {
+                    y: 0,
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.4,
+                    clearProps: "scale" // Prevent blurriness on some screens
+                }, "-=0.2")
+                .fromTo(".spotlight-item", {
+                    y: 10,
+                    opacity: 0
+                }, {
+                    y: 0,
+                    opacity: 1,
+                    stagger: 0.05,
+                    duration: 0.3
+                }, "-=0.2");
+
+        } else {
+            // Exit animation handled safely before unmount/hide logic if we had tracking? 
+            // For now, react unmounts purely on 'isOpen' prop which makes exit anims tricky without AnimatePresence.
+            // We'll rely on fast CSS transitions for closing or accept instant close for responsiveness.
+        }
+    }, { dependencies: [isOpen], scope: containerRef });
 
     // Close on Escape
     useEffect(() => {
@@ -42,31 +87,18 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
         setIsProcessing(true);
         setAiResponse(null);
 
-        try {
-            // Check for slash commands first
-            const slashCommand = parseSlashCommand(input);
-            if (slashCommand) {
-                if (slashCommand.type === 'focus') {
-                    // This creates a task for the UI to handle, or we can emit an event
-                    // For now, let's just let the AI handle it if it's complex, 
-                    // or if it's simple /focus, we might want to trigger the modal via store/props? 
-                    // Since we don't have direct access to setFocusOpen here without prop drilling or store,
-                    // let's pass it to AI to "confirm" entering focus mode or just handle it if it's an action.
-                    // Actually, let's treat it as a "System Action" that bypasses AI for speed if possible.
-                    // But for this V2 implementation, we will pass it to AI to "interpret" the intent for a smoother experience first.
-                }
-            }
+        // Visual feedback
+        gsap.to(inputRef.current, { scale: 0.99, duration: 0.1, yoyo: true, repeat: 1 });
 
-            // Enhanced context for V2
+        try {
             const context = {
                 viewMode: currentView,
-                isFocusMode: document.querySelector('.focus-mode-active') ? true : false,
+                isFocusMode: !!document.querySelector('.focus-mode-active'),
                 timeOfDay: new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'
             };
 
             const response = await processUserCommand(input, tasks, context);
 
-            // Check for destructive actions or significant changes logic from internal V1
             const isDestructive = response.deletedIds.length > 0;
             const manyChanges = (response.added.length + response.updated.length + response.deletedIds.length) > 2;
 
@@ -76,11 +108,15 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
                 await applyChanges(response);
                 setAiResponse(response.aiResponse);
                 setInput('');
-                setTimeout(onClose, 2000); // Auto close after success
+
+                // Success animation
+                gsap.fromTo(".success-flash", { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 0.3, yoyo: true, repeat: 1 });
+                setTimeout(onClose, 1500);
             }
         } catch (error) {
             console.error(error);
-            setAiResponse("Sorry, I couldn't process that. Please try again.");
+            setAiResponse("I couldn't process that request.");
+            gsap.to(modalRef.current, { x: 5, duration: 0.1, yoyo: true, repeat: 3 }); // Shake effect
         } finally {
             setIsProcessing(false);
         }
@@ -89,7 +125,6 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
     const applyChanges = async (response: AICommandResponse) => {
         const generateId = () => Math.random().toString(36).substr(2, 9);
 
-        // Additions
         for (const item of response.added) {
             const newTask: Task = {
                 id: generateId(),
@@ -107,12 +142,10 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
             await addTask(newTask);
         }
 
-        // Deletions
         for (const id of response.deletedIds) {
             await deleteTask(id);
         }
 
-        // Updates
         for (const update of response.updated) {
             const existing = tasks.find(t => t.id === update.id);
             if (existing) {
@@ -129,140 +162,155 @@ export const CommandSpotlight: React.FC<CommandSpotlightProps> = ({ isOpen, onCl
             setAiResponse(pendingAction.response.aiResponse);
             setPendingAction(null);
             setInput('');
-            setTimeout(onClose, 2000);
+            setTimeout(onClose, 1500);
         }
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-14 md:pt-[20vh] px-4 bg-emerald-deep/80 backdrop-blur-md transition-opacity animate-in fade-in duration-200">
-            <div className="w-full max-w-xl md:max-w-2xl bg-[#0a1f1c] border border-gold/20 rounded-sm shadow-2xl shadow-black/50 overflow-hidden flex flex-col animate-in slide-in-from-top-4 duration-300 ring-1 ring-gold/10">
+        <div ref={containerRef} className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
+            {/* Darkened Backdrop with extreme blur */}
+            <div
+                className="absolute inset-0 bg-[#000504]/60 backdrop-blur-md transition-opacity"
+                onClick={onClose}
+            />
 
-                {/* Search Bar Region */}
-                <div className="flex items-center p-4 border-b border-gold/10 bg-emerald-deep/95">
-                    <div className={`p-2 rounded-lg bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/10 shadow-glow-sm ${isProcessing ? 'animate-pulse' : ''}`}>
-                        {isProcessing ? <Sparkles className="w-5 h-5 text-gold animate-spin" /> : <Command className="w-5 h-5 text-gold" />}
+            {/* Main Modal */}
+            <div
+                ref={modalRef}
+                className="w-full max-w-2xl bg-[#0F1412]/90 backdrop-blur-2xl border border-white/5 shadow-2xl rounded-xl overflow-hidden relative ring-1 ring-white/10"
+                style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.05)' }}
+            >
+                {/* Decorative Elements */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-50" />
+                <div className="absolute -top-[100px] left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+                {/* Search Header */}
+                <div className="relative flex items-center p-6 border-b border-white/5">
+                    <div className={`mr-4 p-2 rounded-lg bg-white/5 border border-white/5 text-emerald-400 shadow-lg ${isProcessing ? 'animate-pulse' : ''}`}>
+                        {isProcessing ? <Sparkles className="w-6 h-6 animate-spin-slow" /> : <Command className="w-6 h-6" />}
                     </div>
+
                     <input
                         ref={inputRef}
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleExecute()}
-                        placeholder={pendingAction ? "Confirm action..." : "Type a command..."}
+                        placeholder={pendingAction ? "Confirm your command..." : "What needs to be done?"}
                         disabled={isProcessing || !!pendingAction}
-                        className="flex-1 bg-transparent border-none outline-none text-xl px-4 text-ivory placeholder:text-ivory/30 font-serif italic selection:bg-gold selection:text-emerald-deep"
+                        className="flex-1 bg-transparent border-none outline-none text-2xl text-white font-serif placeholder:text-white/20 caret-emerald-500"
+                        autoComplete="off"
                     />
-                    <div className="flex items-center gap-2">
-                        {input && !isProcessing && !pendingAction && (
-                            <span className="flex items-center gap-1 text-[10px] text-gold/50 font-bold uppercase tracking-widest bg-gold/5 px-2 py-1 rounded border border-gold/10">
-                                <CornerDownLeft className="w-3 h-3" /> Enter
-                            </span>
-                        )}
-                        <button onClick={onClose} className="p-1 hover:bg-gold/10 rounded-full transition-colors group">
-                            <X className="w-5 h-5 text-ivory/50 group-hover:text-gold" />
-                        </button>
-                    </div>
-                </div>
 
-                {/* Content Area */}
-                <div className="max-h-[70vh] md:max-h-[60vh] overflow-y-auto p-4 custom-scrollbar">
-
-                    {/* Default State: Suggestions */}
-                    {!input && !aiResponse && !pendingAction && (
-                        <div className="space-y-4">
-                            <h3 className="text-[10px] font-bold text-gold/50 uppercase tracking-[0.2em] mb-3">Quick Actions</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <button className="flex items-center gap-3 text-left p-4 rounded-sm bg-emerald-light/5 hover:bg-emerald-light/10 transition-all border border-gold/5 hover:border-gold/20 group hover:shadow-glow-sm">
-                                    <div className="p-2 bg-emerald-light/10 rounded-full text-emerald-light group-hover:text-gold transition-colors">
-                                        <Calendar className="w-4 h-4" />
-                                    </div>
-                                    <div>
-                                        <span className="block text-sm font-serif text-ivory/90 group-hover:text-gold transition-colors mb-0.5">Plan Daily Schedule</span>
-                                        <span className="text-[10px] text-ivory/40 uppercase tracking-wider">Morning Briefing</span>
-                                    </div>
-                                </button>
-                                <button className="flex items-center gap-3 text-left p-4 rounded-sm bg-emerald-light/5 hover:bg-emerald-light/10 transition-all border border-gold/5 hover:border-gold/20 group hover:shadow-glow-sm">
-                                    <div className="p-2 bg-emerald-light/10 rounded-full text-emerald-light group-hover:text-gold transition-colors">
-                                        <Zap className="w-4 h-4" />
-                                    </div>
-                                    <div>
-                                        <span className="block text-sm font-serif text-ivory/90 group-hover:text-gold transition-colors mb-0.5">Enter Focus Mode</span>
-                                        <span className="text-[10px] text-ivory/40 uppercase tracking-wider">Start Timer</span>
-                                    </div>
-                                </button>
+                    {input && !isProcessing && (
+                        <div className="absolute right-6 flex items-center gap-2 animate-in fade-in zoom-in duration-200">
+                            <div className="px-2 py-1 bg-white/10 rounded flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest text-emerald-400 border border-emerald-500/20">
+                                <CornerDownLeft className="w-3 h-3" /> Return
                             </div>
                         </div>
                     )}
+                </div>
 
-                    {/* Pending Confirmation View */}
-                    {pendingAction && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 px-2">
-                            <div className="p-6 rounded-sm bg-black/20 border border-gold/30 relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-gold/50" />
-                                <h4 className="flex items-center gap-3 text-gold font-serif text-xl mb-4 italic">
-                                    <AlertCircle className="w-5 h-5" /> Please Confirm
-                                </h4>
-                                <div className="space-y-3 text-sm text-ivory/80 font-sans pl-1">
-                                    {pendingAction.response.added.length > 0 && (
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-emerald-light font-bold text-xs bg-emerald-light/10 px-2 py-0.5 rounded-full border border-emerald-light/20">+ ADD</span>
-                                            <span>{pendingAction.response.added.length} actions</span>
-                                        </div>
-                                    )}
-                                    {pendingAction.response.deletedIds.length > 0 && (
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-crimson font-bold text-xs bg-crimson/10 px-2 py-0.5 rounded-full border border-crimson/20">- PURGE</span>
-                                            <span>{pendingAction.response.deletedIds.length} items</span>
-                                        </div>
-                                    )}
-                                    {pendingAction.response.updated.length > 0 && (
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-gold font-bold text-xs bg-gold/10 px-2 py-0.5 rounded-full border border-gold/20">~ MODIFY</span>
-                                            <span>{pendingAction.response.updated.length} entries</span>
-                                        </div>
-                                    )}
+                {/* Content Body */}
+                <div
+                    ref={resultsRef}
+                    className="max-h-[50vh] overflow-y-auto px-2 py-2"
+                >
+                    {/* Default View (No Input) */}
+                    {!input && !aiResponse && !pendingAction && (
+                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <button
+                                onClick={() => {
+                                    setInput("Enter Focus Mode");
+                                    handleExecute();
+                                }}
+                                className="spotlight-item group flex items-start gap-4 p-4 rounded-lg hover:bg-white/5 border border-transparent hover:border-white/5 transition-all text-left"
+                            >
+                                <div className="p-2 bg-emerald-500/10 rounded-md text-emerald-400 group-hover:bg-emerald-500 group-hover:text-black transition-colors">
+                                    <Zap className="w-5 h-5" />
                                 </div>
-                            </div>
-                            <div className="flex justify-end gap-3 pt-2">
-                                <button
-                                    onClick={() => setPendingAction(null)}
-                                    className="px-6 py-2.5 text-xs font-bold text-ivory/60 hover:text-ivory hover:bg-white/5 transition-all uppercase tracking-widest rounded-sm"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleConfirm}
-                                    className="px-6 py-2.5 bg-gold/10 border border-gold/40 text-gold hover:bg-gold hover:text-emerald-deep text-xs font-bold uppercase tracking-widest transition-all shadow-glow-gold hover:shadow-glow-gold-lg rounded-sm"
-                                >
-                                    Confirm
-                                </button>
+                                <div>
+                                    <span className="block text-white/90 font-medium group-hover:text-emerald-400 transition-colors">Focus Mode</span>
+                                    <span className="text-xs text-white/40">Enter distraction-free zone</span>
+                                </div>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setInput("Prepare my Daily Briefing");
+                                    handleExecute();
+                                }}
+                                className="spotlight-item group flex items-start gap-4 p-4 rounded-lg hover:bg-white/5 border border-transparent hover:border-white/5 transition-all text-left"
+                            >
+                                <div className="p-2 bg-blue-500/10 rounded-md text-blue-400 group-hover:bg-blue-500 group-hover:text-black transition-colors">
+                                    <Calendar className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <span className="block text-white/90 font-medium group-hover:text-blue-400 transition-colors">Daily Briefing</span>
+                                    <span className="text-xs text-white/40">Review today's agenda</span>
+                                </div>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Pending Confirmation */}
+                    {pendingAction && (
+                        <div className="p-6 spotlight-item">
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6 text-center space-y-4">
+                                <div className="mx-auto w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center text-red-500">
+                                    <AlertCircle className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-serif text-white mb-1">Confirm Action</h3>
+                                    <p className="text-white/60 text-sm">
+                                        You are about to modify {pendingAction.response.added.length + pendingAction.response.updated.length} tasks and delete {pendingAction.response.deletedIds.length}.
+                                    </p>
+                                </div>
+                                <div className="flex justify-center gap-3 pt-2">
+                                    <button
+                                        onClick={() => setPendingAction(null)}
+                                        className="px-6 py-2 rounded-md bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleConfirm}
+                                        className="px-6 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-bold tracking-wide transition-colors shadow-lg"
+                                    >
+                                        Execute Changes
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {/* AI Feedback */}
                     {aiResponse && (
-                        <div className="p-4 rounded-sm bg-emerald-light/10 border border-gold/20 text-ivory text-sm animate-in zoom-in-95 flex items-start gap-3">
-                            <div className="p-1 rounded-full bg-gold/10 text-gold mt-0.5">
-                                <Check className="w-4 h-4" />
+                        <div className="p-6 spotlight-item success-flash">
+                            <div className="flex items-start gap-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                                <div className="p-1 bg-emerald-500 rounded-full text-black mt-0.5">
+                                    <Check className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <p className="text-emerald-400 font-serif text-lg italic mb-1">Done.</p>
+                                    <p className="text-white/80 text-sm">{aiResponse}</p>
+                                </div>
                             </div>
-                            <div className="italic font-serif leading-relaxed opacity-90">{aiResponse}</div>
                         </div>
                     )}
-
                 </div>
 
-                {/* Footer / Context Info */}
-                <div className="p-3 border-t border-gold/5 bg-black/40 flex justify-between items-center text-[11px] md:text-xs text-ivory/40 uppercase tracking-widest font-bold">
-                    <div className="flex gap-4">
-                        <span className="flex items-center gap-1.5"><span className="bg-white/10 px-1 rounded">⌘</span> <span className="pt-0.5">Toggle</span></span>
-                        <span className="flex items-center gap-1.5"><span className="bg-white/10 px-1 rounded">ESC</span> <span className="pt-0.5">Close</span></span>
-                    </div>
-                    <div className="font-mono text-gold/30">GEMINI 2.5 FLASH // {currentView.toUpperCase()}</div>
+                {/* Footer */}
+                <div className="bg-black/40 border-t border-white/5 p-3 flex justify-between text-[10px] text-white/30 uppercase tracking-widest font-bold">
+                    <span className="flex items-center gap-2">
+                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-white/50">TAB</span> Navigation
+                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-white/50 ml-2">↑↓</span> Select
+                    </span>
+                    <span>MindUnwind Intelligence</span>
                 </div>
             </div>
         </div>
     );
 };
+

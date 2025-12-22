@@ -13,6 +13,9 @@ const taskRoutes = require('./routes/tasks');
 const app = express();
 let port = process.env.PORT || 3001;
 
+app.set('etag', 'strong'); // Enable strong ETags for strict caching
+app.disable('x-powered-by'); // Hide server stack details
+
 app.use(helmet());
 app.use(compression());
 app.use(cors());

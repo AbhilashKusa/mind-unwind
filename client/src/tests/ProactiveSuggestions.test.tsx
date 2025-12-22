@@ -8,12 +8,15 @@ const mockAddToCommandHistory = vi.fn();
 const mockGenerateProactiveSuggestions = vi.fn();
 
 // Mock the gemini service
+// Mock the gemini service
 vi.mock('../services/gemini', () => ({
     processUserCommand: (...args: any[]) => mockProcessUserCommand(...args),
     addToCommandHistory: (...args: any[]) => mockAddToCommandHistory(...args),
     generateProactiveSuggestions: (...args: any[]) => mockGenerateProactiveSuggestions(...args),
     isAIAvailable: vi.fn().mockReturnValue(true),
-    getAIError: vi.fn().mockReturnValue(null)
+    getAIError: vi.fn().mockReturnValue(null),
+    getPreferredModel: vi.fn().mockReturnValue('auto'),
+    setPreferredModel: vi.fn()
 }));
 
 // Mock Icons

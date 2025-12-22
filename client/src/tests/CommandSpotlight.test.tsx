@@ -15,12 +15,35 @@ vi.mock('../store/useStore', () => ({
     })
 }));
 
+// Mock gemini service
 vi.mock('../services/gemini', () => ({
     processUserCommand: vi.fn(),
     addToCommandHistory: vi.fn(),
     parseSlashCommand: vi.fn(),
-    ProactiveSuggestion: {},
-    isAIAvailable: () => true
+    isAIAvailable: vi.fn().mockReturnValue(true),
+    getAIError: vi.fn().mockReturnValue(null),
+    generateProactiveSuggestions: vi.fn().mockResolvedValue([]),
+    getPreferredModel: vi.fn().mockReturnValue('auto'),
+    setPreferredModel: vi.fn()
+}));
+
+// Mock GSAP
+vi.mock('gsap', () => ({
+    default: {
+        to: vi.fn(),
+        from: vi.fn(),
+        set: vi.fn(),
+        timeline: () => ({
+            to: vi.fn().mockReturnThis(),
+            from: vi.fn().mockReturnThis(),
+            set: vi.fn().mockReturnThis(),
+            add: vi.fn().mockReturnThis(),
+        }),
+    }
+}));
+
+vi.mock('@gsap/react', () => ({
+    useGSAP: vi.fn(),
 }));
 
 describe('CommandSpotlight', () => {
@@ -101,6 +124,52 @@ describe('CommandSpotlight', () => {
                     viewMode: 'calendar'
                     // Ignore other props like isFocusMode which might be flaky in JSDOM
                 })
+            );
+        });
+    });
+    it('triggers Quick Action: Focus Mode', async () => {
+        const mockProcess = vi.spyOn(geminiService, 'processUserCommand');
+        mockProcess.mockResolvedValue({
+            added: [],
+            updated: [],
+            deletedIds: [],
+            aiResponse: "Focus Mode activated"
+        });
+
+        render(<CommandSpotlight isOpen={true} onClose={mockOnClose} currentView="list" />);
+
+        // Find by text content "Focus Mode"
+        const focusBtn = screen.getByText("Focus Mode");
+        fireEvent.click(focusBtn);
+
+        await waitFor(() => {
+            expect(mockProcess).toHaveBeenCalledWith(
+                'Enter Focus Mode',
+                expect.any(Array),
+                expect.any(Object)
+            );
+        });
+    });
+
+    it('triggers Quick Action: Daily Briefing', async () => {
+        const mockProcess = vi.spyOn(geminiService, 'processUserCommand');
+        mockProcess.mockResolvedValue({
+            added: [],
+            updated: [],
+            deletedIds: [],
+            aiResponse: "Here is your briefing"
+        });
+
+        render(<CommandSpotlight isOpen={true} onClose={mockOnClose} currentView="list" />);
+
+        const briefingBtn = screen.getByText("Daily Briefing");
+        fireEvent.click(briefingBtn);
+
+        await waitFor(() => {
+            expect(mockProcess).toHaveBeenCalledWith(
+                'Prepare my Daily Briefing',
+                expect.any(Array),
+                expect.any(Object)
             );
         });
     });

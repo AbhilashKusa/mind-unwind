@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { List, Kanban, Calendar, Sparkles, User, Palette } from 'lucide-react';
+import { List, Kanban, Calendar, Sparkles, User, Palette, LayoutDashboard } from 'lucide-react';
 import { ThemeType } from '../../types';
 
-type ViewMode = 'list' | 'board' | 'calendar' | 'concierge';
+type ViewMode = 'list' | 'board' | 'calendar' | 'concierge' | 'dashboard';
 
 interface SidebarProps {
     currentView: ViewMode;
@@ -16,6 +16,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, currentTheme, onChangeVi
     const [showThemes, setShowThemes] = useState(false);
 
     const navItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'list', label: 'Tasks', icon: List },
         { id: 'board', label: 'Board', icon: Kanban },
         { id: 'calendar', label: 'Calendar', icon: Calendar },
