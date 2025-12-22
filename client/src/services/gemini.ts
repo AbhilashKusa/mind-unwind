@@ -100,7 +100,15 @@ const executeHybridAI = async (
 
   // Mode: DeepSeek Forced
   if (preference === 'deepseek') {
-    return await callOpenRouter(openRouterConfig.messages);
+    try {
+      return await callOpenRouter(openRouterConfig.messages);
+    } catch (e) {
+      console.warn("DeepSeek Forced Mode Failed (401/500). Falling back to Gemini.", e);
+      if (GEMINI_API_KEY) {
+        return await callGemini(geminiConfig.model, geminiConfig.prompt, geminiConfig.schema, geminiConfig.systemPrompt);
+      }
+      throw e; // Rethrow if no fallback
+    }
   }
 
   // Mode: Gemini Forced
