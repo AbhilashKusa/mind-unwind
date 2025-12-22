@@ -127,6 +127,30 @@ describe('CommandSpotlight', () => {
             );
         });
     });
+    it('handles malformed AI response gracefully', async () => {
+        const mockProcess = vi.spyOn(geminiService, 'processUserCommand');
+        // This simulates the behavior of the SAFETY FIX we just added to gemini.ts
+        // The service layer now guarantees structure, so we test that the component handles empty arrays fine.
+        mockProcess.mockResolvedValue({
+            added: [],
+            updated: [],
+            deletedIds: [],
+            aiResponse: "I encountered an error processing that request."
+        });
+
+        render(<CommandSpotlight isOpen={true} onClose={mockOnClose} currentView="list" />);
+
+        const input = screen.getByPlaceholderText(/Type a command/i);
+        fireEvent.change(input, { target: { value: 'Crash me' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+
+        await waitFor(() => {
+            expect(mockProcess).toHaveBeenCalled();
+            // Should verify that no crash occurred and potentially check for error feedback
+            expect(screen.queryByText(/I encountered an error/i)).toBeInTheDocument();
+        });
+    });
+
     it('triggers Quick Action: Focus Mode', async () => {
         const mockProcess = vi.spyOn(geminiService, 'processUserCommand');
         mockProcess.mockResolvedValue({
@@ -138,7 +162,6 @@ describe('CommandSpotlight', () => {
 
         render(<CommandSpotlight isOpen={true} onClose={mockOnClose} currentView="list" />);
 
-        // Find by text content "Focus Mode"
         const focusBtn = screen.getByText("Focus Mode");
         fireEvent.click(focusBtn);
 

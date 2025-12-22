@@ -193,26 +193,39 @@ export const processUserCommand = async (userInput: string, currentTasks: Task[]
     messages: [{ role: "system", content: systemPrompt }, { role: "user", content: prompt }]
   };
 
-  const jsonStr = await executeHybridAI(geminiConf, openRouterConf);
-  return JSON.parse(cleanJson(jsonStr));
+  try {
+    const jsonStr = await executeHybridAI(geminiConf, openRouterConf);
+    const result = JSON.parse(cleanJson(jsonStr));
+
+    // Sanitize response to prevent "undefined" errors
+    return {
+      added: Array.isArray(result.added) ? result.added : [],
+      updated: Array.isArray(result.updated) ? result.updated : [],
+      deletedIds: Array.isArray(result.deletedIds) ? result.deletedIds : [],
+      aiResponse: result.aiResponse || "Processed."
+    };
+  } catch (e) {
+    console.error("AI Processing Error:", e);
+    // Return safe default to prevent crash
+    return { added: [], updated: [], deletedIds: [], aiResponse: "I encountered an error processing that request." };
+  }
 };
 
 export const generateSubtasks = async (taskTitle: string): Promise<Subtask[]> => {
   const prompt = `Break down "${taskTitle}" into 3-5 actionable subtasks. Return JSON: [{"title": "...", "isCompleted": false}]`;
 
-  const jsonStr = await executeHybridAI(
-    { model: "gemini-2.0-flash-exp", prompt, schema: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, isCompleted: { type: Type.BOOLEAN } } } } },
-    { messages: [{ role: "user", content: prompt }] }
-  );
-
   try {
+    const jsonStr = await executeHybridAI(
+      { model: "gemini-2.0-flash-exp", prompt, schema: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, isCompleted: { type: Type.BOOLEAN } } } } },
+      { messages: [{ role: "user", content: prompt }] }
+    );
     const parsed = JSON.parse(cleanJson(jsonStr));
-    return parsed.map((t: any) => ({
+    return Array.isArray(parsed) ? parsed.map((t: any) => ({
       id: Math.random().toString(36).substr(2, 9),
       title: t.title || t,
       isCompleted: false,
       comments: []
-    }));
+    })) : [];
   } catch (e) { return []; }
 };
 
@@ -224,12 +237,14 @@ export const updateTaskWithAI = async (currentTask: Task, instruction: string): 
       Update the task JSON. Return the FULL updated JSON object.
     `;
 
-  const jsonStr = await executeHybridAI(
-    { model: "gemini-2.0-flash-exp", prompt },
-    { messages: [{ role: "user", content: prompt }] }
-  );
-  const updated = JSON.parse(cleanJson(jsonStr));
-  return { ...updated, id: currentTask.id };
+  try {
+    const jsonStr = await executeHybridAI(
+      { model: "gemini-2.0-flash-exp", prompt },
+      { messages: [{ role: "user", content: prompt }] }
+    );
+    const updated = JSON.parse(cleanJson(jsonStr));
+    return { ...updated, id: currentTask.id };
+  } catch (e) { return currentTask; }
 };
 
 export const brainstormIdeas = async (goal: string): Promise<GeneratedTaskData[]> => {
@@ -238,11 +253,14 @@ export const brainstormIdeas = async (goal: string): Promise<GeneratedTaskData[]
       Generate 5 tasks. Return JSON: [{"title": "...", "description": "...", "priority": "Medium", "category": "General"}]
     `;
 
-  const jsonStr = await executeHybridAI(
-    { model: "gemini-2.0-flash-exp", prompt, schema: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING }, priority: { type: Type.STRING }, category: { type: Type.STRING } } } } },
-    { messages: [{ role: "user", content: prompt }] }
-  );
-  return JSON.parse(cleanJson(jsonStr));
+  try {
+    const jsonStr = await executeHybridAI(
+      { model: "gemini-2.0-flash-exp", prompt, schema: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING }, priority: { type: Type.STRING }, category: { type: Type.STRING } } } } },
+      { messages: [{ role: "user", content: prompt }] }
+    );
+    const res = JSON.parse(cleanJson(jsonStr));
+    return Array.isArray(res) ? res : [];
+  } catch (e) { return []; }
 };
 
 export const optimizeSchedule = async (tasks: Task[]): Promise<Task[]> => {
@@ -254,6 +272,7 @@ export const optimizeSchedule = async (tasks: Task[]): Promise<Task[]> => {
       { messages: [{ role: "user", content: prompt }] }
     );
     const updates = JSON.parse(cleanJson(jsonStr));
+    if (!Array.isArray(updates)) return tasks;
     return tasks.map(t => {
       const u = updates.find((up: any) => up.id === t.id);
       return u ? { ...t, ...u } : t;
