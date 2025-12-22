@@ -3,7 +3,7 @@ import { GeneratedTaskData, Task, Subtask, AICommandResponse } from "../types";
 
 // --- Configuration ---
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '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';
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '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';
 
 // --- Types & Preferences ---
 export type AIModelPreference = 'auto' | 'gemini' | 'deepseek';
